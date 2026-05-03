@@ -94,8 +94,19 @@ class TransformersReader:
         answer = str(result.get("answer", "")).strip()
         confidence = float(result.get("score", 0.0))
 
-        if not answer or confidence < 0.05:
-            return ReaderOutput(NOT_FOUND_ANSWER, confidence, "", self.model_name, False)
+        # Low confidence fallback
+        if not answer or confidence < 0.15:
+            # Use best retrieval as fallback
+            best_retrieval = retrievals[0]
+            fallback_answer = best_retrieval.chunk.text
+            fallback_evidence = best_retrieval.chunk.text
+            return ReaderOutput(
+                answer=fallback_answer,
+                confidence=best_retrieval.score,
+                evidence=fallback_evidence,
+                model=f"{self.model_name} (fallback)",
+                found=True
+            )
 
         evidence = _sentence_containing_answer(context, answer) or retrievals[0].chunk.text
         return ReaderOutput(answer, confidence, evidence, self.model_name, True)

@@ -6,3 +6,4 @@ torch>=2.2
 sentence-transformers>=3.0
 numpy>=1.26
 pytest>=8.2
+datasets>=2.14

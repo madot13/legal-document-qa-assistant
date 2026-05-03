@@ -32,13 +32,74 @@ data/sample_questions.jsonl
 tests/
 ```
 
+## Installation and Deployment
+
+### Prerequisites
+
+- Python 3.9+
+- Git
+
+### Installation
+
+1. **Clone the repository:**
+```bash
+git clone <repository-url>
+cd ai_project_nlp
+```
+
+2. **Create virtual environment:**
+```bash
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+```
+
+3. **Install dependencies:**
+```bash
+pip install -r requirements.txt
+```
+
+### Running the Application
+
+#### Option 1: Streamlit UI (Recommended)
+```bash
+streamlit run app.py
+```
+
+#### Option 2: Command Line Interface
+```bash
+# Offline baseline
+python -m legal_qa.cli \
+  --document data/sample_contract.txt \
+  --question "Can either party assign the agreement?"
+```
+
+#### Option 3: Load CUAD Dataset
+```bash
+streamlit run app.py
+# Select "Load CUAD Dataset" mode
+# Click "Load CUAD Dataset from Hugging Face"
+# Choose questions from dropdown
+```
+
+### Development
+
+#### Running Tests
+```bash
+python -m unittest discover -s tests
+```
+
+#### Sample Evaluation
+```bash
+python scripts/evaluate_sample.py
+```
+
 ## Quick start
 
 Run the offline baseline:
 
 ```bash
 python -m legal_qa.cli \
-  --document data/leqal_qa_dataset.csv \
+  --document data/sample_contract.txt \
   --question "Can either party assign the agreement?"
 ```
 
@@ -82,19 +143,15 @@ streamlit run app.py
 
 Upload a text, PDF, or DOCX contract, ask a question, and inspect the evidence chunk returned by the pipeline.
 
-## Dataset path
+### Supported Input Modes
 
-Recommended datasets for the next phase:
+1. **Upload Document** - Load individual legal documents (.txt, .md, .pdf, .docx)
+2. **Upload QA Dataset (CSV)** - Load custom QA datasets with question-answer pairs
+3. **Load CUAD Dataset** - Access the Contract Understanding Atticus Dataset (CUAD) from Hugging Face
 
-- ContractNLI: document-level contract inference with evidence spans. https://stanfordnlp.github.io/contract-nli/
-- CUAD: clause-level commercial contract annotations. https://www.atticusprojectai.org/cuad
-- LegalQA: Chinese legal advice QA. https://github.com/siatnlp/LegalQA
-- LexGLUE: broader legal NLP benchmark. https://github.com/coastalcph/lex-glue
+The CUAD dataset provides:
+- 13,000+ expert-annotated labels across 510 commercial contracts
+- 41 categories of important legal clauses
+- Real-world contract review scenarios
+- Benchmark for legal NLP systems
 
-## Suggested next milestones
-
-1. Add dataset adapters for ContractNLI and CUAD.
-2. Fine-tune a transformer QA or NLI model.
-3. Add a persistent vector index.
-4. Evaluate retrieval recall and evidence overlap on a held-out split.
-5. Add page/section tracking for PDFs with OCR fallback.
