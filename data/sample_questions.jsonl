@@ -1,0 +1,4 @@
+{"question": "Can either party assign the agreement?", "expected_terms": ["consent", "affiliate"]}
+{"question": "How long do confidentiality obligations survive?", "expected_terms": ["three years", "termination"]}
+{"question": "What law governs the agreement?", "expected_terms": ["New York"]}
+{"question": "Can the disclosing party seek injunctive relief?", "expected_terms": ["injunctive relief"]}

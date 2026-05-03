@@ -1,0 +1,22 @@
+MUTUAL NON-DISCLOSURE AGREEMENT
+
+1. Confidential Information.
+Confidential Information means all non-public business, technical, financial, product, customer, and pricing information disclosed by one party to the other party, whether disclosed in writing, orally, electronically, or by inspection of tangible objects.
+
+2. Use and Protection.
+The receiving party shall use Confidential Information only to evaluate or perform the business relationship between the parties. The receiving party shall protect Confidential Information using at least the same degree of care that it uses to protect its own confidential information, but in no event less than reasonable care.
+
+3. Exclusions.
+Confidential Information does not include information that is publicly available without breach of this Agreement, already known by the receiving party without restriction, independently developed without use of Confidential Information, or rightfully received from a third party without a duty of confidentiality.
+
+4. Term and Termination.
+This Agreement begins on the Effective Date and continues for two years unless terminated earlier by either party upon thirty days written notice. The confidentiality obligations survive termination for three years after the date of disclosure.
+
+5. Assignment.
+Neither party may assign this Agreement without the prior written consent of the other party, except to an affiliate or successor in connection with a merger, reorganization, or sale of substantially all assets.
+
+6. Remedies.
+Each party acknowledges that unauthorized disclosure of Confidential Information may cause irreparable harm for which monetary damages may be inadequate. The disclosing party may seek injunctive relief in addition to any other remedies available at law or in equity.
+
+7. Governing Law.
+This Agreement is governed by the laws of the State of New York, without regard to conflict of law principles.
