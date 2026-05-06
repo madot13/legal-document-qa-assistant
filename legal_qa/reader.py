@@ -78,21 +78,44 @@ class TransformersReader:
 
     def __init__(self, model_name: str = "deepset/roberta-base-squad2"):
         try:
-            from transformers import pipeline
+            import torch
+            from transformers import AutoModelForQuestionAnswering, AutoTokenizer
         except ImportError as exc:
             raise RuntimeError("Transformer QA requires transformers and torch. Install requirements.txt.") from exc
 
         self.model_name = model_name
-        self._pipeline = pipeline("question-answering", model=model_name, tokenizer=model_name)
+        self._torch = torch
+        self._tokenizer = AutoTokenizer.from_pretrained(model_name)
+        self._model = AutoModelForQuestionAnswering.from_pretrained(model_name)
+        self._model.eval()
 
     def answer(self, question: str, retrievals: Sequence[RetrievalResult]) -> ReaderOutput:
         if not retrievals:
             return ReaderOutput(NOT_FOUND_ANSWER, 0.0, "", self.model_name, False)
 
         context = "\n\n".join(item.chunk.text for item in retrievals)
-        result = self._pipeline(question=question, context=context)
-        answer = str(result.get("answer", "")).strip()
-        confidence = float(result.get("score", 0.0))
+        inputs = self._tokenizer(
+            question,
+            context,
+            return_tensors="pt",
+            truncation="only_second",
+            max_length=384,
+        )
+
+        with self._torch.no_grad():
+            outputs = self._model(**inputs)
+
+        start_scores = self._torch.softmax(outputs.start_logits[0], dim=0)
+        end_scores = self._torch.softmax(outputs.end_logits[0], dim=0)
+        start_index = int(self._torch.argmax(start_scores))
+        end_index = int(self._torch.argmax(end_scores))
+
+        if end_index < start_index:
+            start_index, end_index = end_index, start_index
+
+        answer_ids = inputs["input_ids"][0][start_index : end_index + 1]
+        answer = self._tokenizer.decode(answer_ids, skip_special_tokens=True).strip()
+        confidence = float(start_scores[start_index] * end_scores[end_index])
 
         # Low confidence fallback
         if not answer or confidence < 0.15:
