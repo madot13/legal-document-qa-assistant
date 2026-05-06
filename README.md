@@ -1,3 +1,19 @@
+---
+title: Legal Document QA Assistant
+emoji: ⚖️
+colorFrom: blue
+colorTo: green
+sdk: docker
+app_port: 7860
+pinned: false
+suggested_hardware: cpu-basic
+models:
+  - deepset/roberta-base-squad2
+  - sentence-transformers/all-MiniLM-L6-v2
+datasets:
+  - theatticusproject/cuad
+---
+
 # Legal Document QA Assistant
 
 Evidence-grounded question answering over legal documents and contracts.
@@ -154,4 +170,3 @@ The CUAD dataset provides:
 - 41 categories of important legal clauses
 - Real-world contract review scenarios
 - Benchmark for legal NLP systems
-

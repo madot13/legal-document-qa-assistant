@@ -79,6 +79,8 @@ qa_dataset = st.session_state.qa_dataset
 cuad_adapter = st.session_state.cuad_adapter
 document_text = st.session_state.document_text
 question = ""
+assistant = None
+result = None
 
 if input_mode == "Upload Document":
     uploaded_file = st.file_uploader("Document", type=["txt", "md", "pdf", "docx"])
@@ -289,7 +291,7 @@ if (uploaded_file and question) or (qa_dataset is not None and question):
         st.stop()
 
     # Enhanced result display (only show if not in comparison mode)
-if not (compare_mode and reader == "transformers"):
+if result is not None and not (compare_mode and reader == "transformers"):
     col1, col2, col3, col4 = st.columns(4)
     col1.metric("Confidence", f"{result.confidence:.2f}")
     col2.metric("Retrieval Score", f"{result.retrieval_score:.3f}")
@@ -312,7 +314,7 @@ if not (compare_mode and reader == "transformers"):
     st.caption(f"Source: {result.source} | Chunk: {result.chunk_id} | Model: {result.model}")
 
 # If using CSV or CUAD dataset, show comparison with expected answer
-if qa_dataset is not None and question:
+if result is not None and qa_dataset is not None and question:
     if input_mode == "Load CUAD Dataset":
         # For CUAD, we need to find the exact match
         expected_row = qa_dataset[qa_dataset['question'] == question]
