@@ -28,7 +28,6 @@ class CUADAdapter:
     ) -> bool:
         """Load real CUAD QA dataset from Hugging Face."""
         try:
-            # IMPORTANT: use CUAD-QA, not raw CUAD
             self.dataset = load_dataset(
                 "theatticusproject/cuad-qa",
                 trust_remote_code=True,
@@ -44,7 +43,6 @@ class CUADAdapter:
         except Exception as e:
             print(f"Error loading CUAD-QA from Hugging Face: {e}")
 
-            # Do NOT silently use demo data unless explicitly allowed
             if use_demo_on_fail:
                 return self._load_demo_data()
 
