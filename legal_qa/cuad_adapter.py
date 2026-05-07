@@ -4,9 +4,8 @@ This module provides functionality to load and process the CUAD (Contract Unders
 for use with the Legal QA Assistant.
 """
 
-from __future__ import annotations
-
 import json
+import re
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
@@ -21,16 +20,35 @@ class CUADAdapter:
         self.dataset = None
         self.qa_pairs = []
     
-    def load_from_huggingface(self) -> bool:
-        """Load CUAD dataset from Hugging Face."""
+    def load_from_huggingface(
+        self,
+        split: str = "train",
+        limit: Optional[int] = None,
+        use_demo_on_fail: bool = False,
+    ) -> bool:
+        """Load real CUAD QA dataset from Hugging Face."""
         try:
-            # Try to load the main CUAD dataset first
-            self.dataset = load_dataset("theatticusproject/cuad")
+            # IMPORTANT: use CUAD-QA, not raw CUAD
+            self.dataset = load_dataset(
+                "theatticusproject/cuad-qa",
+                trust_remote_code=True,
+            )
+
+            self.qa_pairs = self.extract_qa_pairs(split=split, limit=limit)
+
+            if not self.qa_pairs:
+                raise ValueError("CUAD-QA loaded, but no QA pairs were extracted.")
+
             return True
+
         except Exception as e:
-            print(f"Error loading CUAD from Hugging Face: {e}")
-            # Fallback to demo data
-            return self._load_demo_data()
+            print(f"Error loading CUAD-QA from Hugging Face: {e}")
+
+            # Do NOT silently use demo data unless explicitly allowed
+            if use_demo_on_fail:
+                return self._load_demo_data()
+
+            return False
     
     def _load_demo_data(self) -> bool:
         """Load demo CUAD-style data for demonstration."""
@@ -104,41 +122,65 @@ class CUADAdapter:
             print(f"Error loading CUAD from JSON: {e}")
             return False
     
-    def extract_qa_pairs(self, split: str = "train", limit: Optional[int] = None) -> List[Dict]:
-        """Extract QA pairs from the dataset."""
+    def extract_qa_pairs(
+        self,
+        split: str = "train",
+        limit: Optional[int] = None,
+        include_unanswerable: bool = True,
+    ) -> List[Dict]:
+        """Extract QA pairs from CUAD-QA dataset."""
         qa_pairs = []
-        
-        if self.dataset is not None:
-            # Load from Hugging Face dataset (if successful)
-            try:
-                data = self.dataset[split]
-                
-                for i, item in enumerate(data):
-                    if limit and i >= limit:
-                        break
-                    
-                    # Extract answer text
-                    answer_text = item['answers']['text'][0] if item['answers']['text'] else ""
-                    
-                    qa_pair = {
-                        'id': item['id'],
-                        'title': item['title'],
-                        'question': item['question'],
-                        'answer': answer_text,
-                        'context': item['context'],
-                        'evidence': item['context'][item['answers']['answer_start'][0]:item['answers']['answer_start'][0] + len(answer_text)] if item['answers']['answer_start'] and answer_text else "",
-                        'category': self._extract_category_from_question(item['question'])
-                    }
-                    qa_pairs.append(qa_pair)
-            except Exception as e:
-                print(f"Error processing Hugging Face dataset: {e}")
-                # Fall back to demo data
-                return self._extract_demo_qa_pairs(limit)
-        
-        elif self.qa_pairs:
-            # Use loaded QA pairs (demo data)
-            return self._extract_demo_qa_pairs(limit)
-        
+
+        if self.dataset is None:
+            return self._extract_demo_qa_pairs(limit) if self.qa_pairs else []
+
+        data = self.dataset[split]
+
+        for i, item in enumerate(data):
+            if limit is not None and len(qa_pairs) >= limit:
+                break
+
+            answers = item.get("answers", {}) or {}
+
+            answer_texts = answers.get("text", [])
+            answer_starts = answers.get("answer_start", [])
+
+            if isinstance(answer_texts, str):
+                answer_texts = [answer_texts]
+
+            if isinstance(answer_starts, int):
+                answer_starts = [answer_starts]
+
+            answer_text = answer_texts[0] if answer_texts else ""
+            answer_start = answer_starts[0] if answer_starts else -1
+
+            if not include_unanswerable and not answer_text:
+                continue
+
+            context = item.get("context", "") or ""
+
+            if answer_text and isinstance(answer_start, int) and answer_start >= 0:
+                evidence = context[answer_start:answer_start + len(answer_text)]
+            else:
+                evidence = ""
+
+            question = item.get("question", "") or ""
+
+            qa_pair = {
+                "id": item.get("id", f"cuad_{i}"),
+                "title": item.get("title", ""),
+                "question": self._map_category_to_natural_question(
+                    self._extract_category_from_question(question)
+                ),
+                "original_question": question,
+                "answer": answer_text,
+                "context": context,
+                "evidence": evidence,
+                "category": self._extract_category_from_question(question),
+            }
+
+            qa_pairs.append(qa_pair)
+
         return qa_pairs
     
     def _extract_demo_qa_pairs(self, limit: Optional[int] = None) -> List[Dict]:
@@ -212,13 +254,15 @@ class CUADAdapter:
         return category_mappings.get(category, f"What {category.lower()} provisions are stated?")
     
     def _extract_category_from_question(self, question: str) -> str:
-        """Extract category from question text."""
-        # CUAD questions have format like: "Highlight the parts related to 'Category Name'"
-        if "related to" in question:
-            start = question.find('"') + 1
-            end = question.find('"', start)
-            if start > 0 and end > start:
-                return question[start:end]
+        """Extract CUAD category from question text."""
+        if not question:
+            return "Unknown"
+
+        match = re.search(r"related to\s+[\"']([^\"']+)[\"']", question)
+
+        if match:
+            return match.group(1).strip()
+
         return "Unknown"
     
     def get_categories(self) -> List[str]:
@@ -227,27 +271,52 @@ class CUADAdapter:
         categories = list(set(pair['category'] for pair in qa_pairs))
         return sorted([cat for cat in categories if cat != "Unknown"])
     
-    def get_dataframe(self, split: str = "train", limit: Optional[int] = None) -> pd.DataFrame:
+    def get_dataframe(
+        self,
+        split: str = "train",
+        limit: Optional[int] = None,
+    ) -> pd.DataFrame:
         """Get QA pairs as a pandas DataFrame."""
-        qa_pairs = self.extract_qa_pairs(split, limit)
-        return pd.DataFrame(qa_pairs)
+        if not self.qa_pairs:
+            self.qa_pairs = self.extract_qa_pairs(split=split, limit=limit)
+
+        data = self.qa_pairs[:limit] if limit else self.qa_pairs
+        return pd.DataFrame(data)
     
     def get_sample_questions(self, num_samples: int = 10) -> List[str]:
         """Get sample questions from the dataset."""
         qa_pairs = self.extract_qa_pairs(limit=num_samples)
         return [pair['question'] for pair in qa_pairs]
     
-    def create_document_from_contexts(self, split: str = "train", limit: Optional[int] = None) -> str:
-        """Create a single document from all contexts for processing."""
-        qa_pairs = self.extract_qa_pairs(split, limit)
+    def create_document_from_contexts(
+        self,
+        split: str = "train",
+        limit: Optional[int] = None,
+    ) -> str:
+        """Create a single document from CUAD contexts."""
+        if not self.qa_pairs:
+            self.qa_pairs = self.extract_qa_pairs(split=split, limit=limit)
+
+        qa_pairs = self.qa_pairs[:limit] if limit else self.qa_pairs
+
         contexts = []
-        
+        seen_contexts = set()
+
         for i, pair in enumerate(qa_pairs):
-            # Add section header
-            category = pair['category']
-            title = pair['title'][:50] + "..." if len(pair['title']) > 50 else pair['title']
-            contexts.append(f"=== Section {i+1}: {category} ({title}) ===")
-            contexts.append(pair['context'])
-            contexts.append("")  # Add spacing
-        
+            context = pair.get("context", "")
+
+            # Avoid repeating the same long contract context many times
+            if not context or context in seen_contexts:
+                continue
+
+            seen_contexts.add(context)
+
+            category = pair.get("category", "Unknown")
+            title = pair.get("title", "")
+            title = title[:80] + "..." if len(title) > 80 else title
+
+            contexts.append(f"=== CUAD Document {i + 1}: {category} ({title}) ===")
+            contexts.append(context)
+            contexts.append("")
+
         return "\n".join(contexts)
