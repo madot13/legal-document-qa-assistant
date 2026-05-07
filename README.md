@@ -8,126 +8,134 @@ app_port: 7860
 pinned: false
 suggested_hardware: cpu-basic
 models:
-  - deepset/roberta-base-squad2
+  - madot12/legal-bert-qa
   - sentence-transformers/all-MiniLM-L6-v2
 datasets:
   - theatticusproject/cuad
 ---
 
-# Demo link
-
-https://madot12-legal-doc-qa-assistant.hf.space
-
 # Legal Document QA Assistant
 
 Evidence-grounded question answering over legal documents and contracts.
 
-This project starts with a dependency-light retrieval QA baseline and leaves clear extension points for transformer readers, dense embeddings, and dataset fine-tuning.
+Live demo: https://madot12-legal-doc-qa-assistant.hf.space  
+Fine-tuned model: https://huggingface.co/madot12/legal-bert-qa
 
-## What it does
+## Project Overview
 
-- Loads legal text from `.txt`, `.md`, `.pdf`, or `.docx` files.
-- Splits documents into traceable chunks with source metadata.
-- Retrieves relevant clauses with BM25, or optional dense embeddings.
-- Answers questions with either a lexical baseline or an optional Hugging Face extractive QA model.
-- Returns an answer, supporting evidence, source chunk, confidence, and retrieval score.
+This project implements a retrieval-augmented legal QA pipeline. A user uploads a legal document or selects a QA dataset question, the system retrieves the most relevant contract clauses, and then extracts an answer with supporting evidence.
+
+The application supports:
+
+- TXT, Markdown, PDF, and DOCX document loading.
+- Section-aware legal document chunking.
+- BM25 keyword retrieval and dense semantic retrieval.
+- Lexical baseline QA and transformer-based extractive QA.
+- Fine-tuned Legal-BERT checkpoint for legal-domain question answering.
+- Answerability detection for unsupported/no-answer questions.
+- Dataset-level evaluation with CSV and JSON result outputs.
 
 This is a document assistance tool, not legal advice.
 
-## Project layout
+## Project Structure
 
 ```text
-legal_qa/
-  assistant.py          High-level pipeline
-  chunking.py           Document chunking
-  document_loader.py    Text extraction
-  reader.py             Lexical and transformer answer readers
-  retriever.py          BM25 and optional dense retrievers
-  tokenization.py       Legal-aware tokenization helpers
-  types.py              Shared dataclasses
-app.py                  Optional Streamlit UI
-scripts/evaluate_sample.py
-data/sample_contract.txt
-data/sample_questions.jsonl
-tests/
+.
+├── app.py
+├── README.md
+├── requirements.txt
+├── pyproject.toml
+├── Dockerfile
+├── legal_qa/
+│   ├── __init__.py
+│   ├── assistant.py
+│   ├── chunking.py
+│   ├── cli.py
+│   ├── cuad_adapter.py
+│   ├── document_loader.py
+│   ├── reader.py
+│   ├── retriever.py
+│   ├── tokenization.py
+│   └── types.py
+├── scripts/
+│   ├── evaluate_dataset.py
+│   ├── evaluate_sample.py
+│   └── train_legal_bert_qa.py
+├── data/
+│   ├── leqal_qa_dataset.csv
+│   ├── sample_contract.txt
+│   └── sample_questions.jsonl
+├── docs/
+│   └── Legal_Document_QA_Final_Report.pdf
+└── poster/
 ```
 
-## Installation and Deployment
+## Main Files
 
-### Prerequisites
+- `app.py` - Streamlit web interface for document upload, dataset QA, CUAD demo, method selection, and result display.
+- `legal_qa/assistant.py` - High-level pipeline that connects chunking, retrieval, reading, and final answer formatting.
+- `legal_qa/chunking.py` - Splits legal text into searchable chunks while preserving section context and source offsets.
+- `legal_qa/retriever.py` - Implements BM25 keyword retrieval and optional dense embedding retrieval.
+- `legal_qa/reader.py` - Implements lexical QA, transformer QA, answer post-processing, and no-answer detection.
+- `legal_qa/document_loader.py` - Loads text from TXT, Markdown, PDF, and DOCX files.
+- `legal_qa/cuad_adapter.py` - Loads CUAD data from Hugging Face or fallback demo examples.
+- `scripts/train_legal_bert_qa.py` - Fine-tunes `nlpaueb/legal-bert-base-uncased` for extractive legal QA.
+- `scripts/evaluate_dataset.py` - Runs dataset evaluation and method comparison.
+- `data/leqal_qa_dataset.csv` - Self-created manually labeled legal QA dataset.
+- `docs/Legal_Document_QA_Final_Report.pdf` - Final 3-5 page project documentation.
 
-- Python 3.9+
-- Git
+## Dataset
 
-### Hugging Face Spaces Deployment
-
-This repository is ready for a Docker-based Hugging Face Space. Create a new Space with `sdk: docker`, then push this repository to the Space repo. The included `Dockerfile` runs Streamlit on port `7860`, matching the `app_port: 7860` setting in this README metadata.
-
-For the fine-tuned Legal-BERT checkpoint, use a separate Hugging Face model repository and set this Space variable:
+The main dataset is:
 
 ```text
-LEGAL_QA_MODEL=<your-username-or-org>/legal-bert-qa
+data/leqal_qa_dataset.csv
 ```
 
-The Docker image sets `LEGAL_QA_ALLOW_MODEL_DOWNLOADS=1`, so the Space can download the configured model at runtime. The local `models/` and `.hf_cache/` folders are intentionally ignored by git because they are large generated artifacts.
+It contains manually created legal QA examples with these columns:
 
-### Installation
-
-1. **Clone the repository:**
-```bash
-git clone <repository-url>
-cd ai_project_nlp
+```text
+id, contract_id, section, clause_text, question, answer, evidence
 ```
 
-2. **Create virtual environment:**
+The dataset includes multiple legal clause categories and harder no-answer questions. The application also supports CUAD-style examples through the Hugging Face dataset loader.
+
+## Method
+
+The system follows this workflow:
+
+```text
+document or dataset
+  -> text loading
+  -> section-aware chunking
+  -> BM25 or dense retrieval
+  -> lexical or transformer QA reader
+  -> answer + evidence + confidence + retrieval score
+```
+
+The fine-tuned transformer model is based on `nlpaueb/legal-bert-base-uncased`. It was trained as an extractive QA model to predict the start and end token positions of the answer span inside the legal context.
+
+## Installation
+
 ```bash
 python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-```
-
-3. **Install dependencies:**
-```bash
+source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### Running the Application
+## Run the Streamlit App
 
-#### Option 1: Streamlit UI (Recommended)
 ```bash
 streamlit run app.py
 ```
 
-#### Option 2: Command Line Interface
-```bash
-# Offline baseline
-python -m legal_qa.cli \
-  --document data/sample_contract.txt \
-  --question "Can either party assign the agreement?"
-```
+Then choose one of the input modes:
 
-#### Option 3: Load CUAD Dataset
-```bash
-streamlit run app.py
-# Select "Load CUAD Dataset" mode
-# Click "Load CUAD Dataset from Hugging Face"
-# Choose questions from dropdown
-```
+1. `Upload Document`
+2. `Upload QA Dataset (CSV)`
+3. `Load CUAD Dataset`
 
-### Development
-
-#### Running Tests
-```bash
-python -m unittest discover -s tests
-```
-
-#### Sample Evaluation
-```bash
-python scripts/evaluate_sample.py
-```
-
-## Quick start
-
-Run the offline baseline:
+## Run from CLI
 
 ```bash
 python -m legal_qa.cli \
@@ -135,54 +143,79 @@ python -m legal_qa.cli \
   --question "Can either party assign the agreement?"
 ```
 
-Run sample evaluation:
+Transformer mode:
 
 ```bash
-python scripts/evaluate_sample.py
-```
-
-Run tests:
-
-```bash
-python -m unittest discover -s tests
-```
-
-## Optional transformer QA
-
-Install optional dependencies:
-
-```bash
-python -m pip install -r requirements.txt
-```
-
-Then run:
-
-```bash
-python -m legal_qa.cli \
+LEGAL_QA_ALLOW_MODEL_DOWNLOADS=1 python -m legal_qa.cli \
   --document data/sample_contract.txt \
-  --question "How long do confidentiality obligations survive?" \
+  --question "How long must confidential information be kept secret?" \
   --reader transformers \
-  --model deepset/roberta-base-squad2
+  --model madot12/legal-bert-qa
 ```
 
-The default pipeline is intentionally offline-friendly. The transformer reader downloads a model on first use.
+## Fine-Tuning
 
-## Optional Streamlit demo
+The training script converts the CSV dataset into extractive QA examples:
+
+```text
+question + context + answer_start + answer_end
+```
+
+Run training:
 
 ```bash
-streamlit run app.py
+LEGAL_QA_ALLOW_MODEL_DOWNLOADS=1 python scripts/train_legal_bert_qa.py \
+  --allow-downloads \
+  --epochs 1 \
+  --batch-size 4 \
+  --output-dir models/legal-bert-qa
 ```
 
-Upload a text, PDF, or DOCX contract, ask a question, and inspect the evidence chunk returned by the pipeline.
+The local `models/` directory is not included in the submission ZIP because the checkpoint is large. The deployed checkpoint is available here:
 
-### Supported Input Modes
+```text
+https://huggingface.co/madot12/legal-bert-qa
+```
 
-1. **Upload Document** - Load individual legal documents (.txt, .md, .pdf, .docx)
-2. **Upload QA Dataset (CSV)** - Load custom QA datasets with question-answer pairs
-3. **Load CUAD Dataset** - Access the Contract Understanding Atticus Dataset (CUAD) from Hugging Face
+## Evaluation
 
-The CUAD dataset provides:
-- 13,000+ expert-annotated labels across 510 commercial contracts
-- 41 categories of important legal clauses
-- Real-world contract review scenarios
-- Benchmark for legal NLP systems
+Run full dataset evaluation:
+
+```bash
+python scripts/evaluate_dataset.py
+```
+
+Generated outputs:
+
+```text
+results/evaluation_results.csv
+results/evaluation_summary.json
+results/method_comparison.csv
+results/method_comparison.json
+results/error_analysis_by_category.csv
+results/category_accuracy.svg
+```
+
+Run the small sample evaluation:
+
+```bash
+python scripts/evaluate_sample.py
+```
+
+## Deployment
+
+The project is deployed on Hugging Face Spaces with Docker.
+
+Space URL:
+
+```text
+https://madot12-legal-doc-qa-assistant.hf.space
+```
+
+The Space uses this model variable:
+
+```text
+LEGAL_QA_MODEL=madot12/legal-bert-qa
+```
+
+The `Dockerfile` installs `requirements.txt` and starts Streamlit on port `7860`.
