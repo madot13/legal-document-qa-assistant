@@ -1,0 +1,10 @@
+.git
+.hf_cache
+.pytest_cache
+.venv
+__pycache__
+*.pyc
+docs
+htmlcov
+models
+results

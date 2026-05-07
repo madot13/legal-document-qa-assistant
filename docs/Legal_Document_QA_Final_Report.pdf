@@ -1,0 +1,225 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+2 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+3 0 obj
+<< /Length 2507 >>
+stream
+BT /F2 23 Tf 72 742 Td (Legal Document QA Assistant) Tj ET
+BT /F1 13 Tf 72 716 Td (INF375 Artificial Intelligence Final Project Report) Tj ET
+BT /F1 10 Tf 72 692 Td (Live demo: https://madot12-legal-doc-qa-assistant.hf.space) Tj ET
+BT /F1 11 Tf 72 672 Td (This project implements an evidence-grounded question answering system for legal texts) Tj ET
+BT /F1 11 Tf 72 657 Td (and contracts. The system accepts legal clauses or uploaded documents, retrieves the) Tj ET
+BT /F1 11 Tf 72 642 Td (most relevant context, and returns an answer together with supporting evidence and) Tj ET
+BT /F1 11 Tf 72 627 Td (confidence scores.) Tj ET
+q 0.96 0.98 1 rg 72 535 140 70 re f Q
+q 0.74 0.82 0.93 RG 72 535 140 70 re S Q
+BT /F1 9 Tf 82 585 Td (Dataset questions) Tj ET
+BT /F2 18 Tf 82 551 Td (75) Tj ET
+q 0.96 0.98 1 rg 236 535 140 70 re f Q
+q 0.74 0.82 0.93 RG 236 535 140 70 re S Q
+BT /F1 9 Tf 246 585 Td (Evidence accuracy) Tj ET
+BT /F2 18 Tf 246 551 Td (100%) Tj ET
+q 0.96 0.98 1 rg 400 535 140 70 re f Q
+q 0.74 0.82 0.93 RG 400 535 140 70 re S Q
+BT /F1 9 Tf 410 585 Td (Average token F1) Tj ET
+BT /F2 18 Tf 410 551 Td (60%) Tj ET
+BT /F2 15 Tf 72 497 Td (Project Team) Tj ET
+BT /F1 10 Tf 72 475 Td (230103109 - Madi Zhazykenov) Tj ET
+BT /F1 10 Tf 72 461 Td (230103225 - Danial Maksatuly) Tj ET
+BT /F1 10 Tf 72 447 Td (230103382 - Sherzodbek Saydakhmedov) Tj ET
+BT /F2 15 Tf 72 425 Td (Problem Statement) Tj ET
+BT /F1 11 Tf 72 403 Td (Legal contracts are long, dense, and difficult to scan manually. A user may need to) Tj ET
+BT /F1 11 Tf 72 388 Td (answer targeted questions such as whether assignment is allowed, how termination works,) Tj ET
+BT /F1 11 Tf 72 373 Td (or what confidentiality obligations apply. The project goal is to reduce manual search) Tj ET
+BT /F1 11 Tf 72 358 Td (effort by building a reproducible NLP pipeline that finds relevant clauses and extracts) Tj ET
+BT /F1 11 Tf 72 343 Td (concise answers.) Tj ET
+BT /F2 15 Tf 72 320 Td (AI Technique Used) Tj ET
+BT /F1 11 Tf 84 298 Td (- Retrieval-Augmented Question Answering: retrieve relevant clauses first, then) Tj ET
+BT /F1 11 Tf 84 283 Td (  extract an answer from that evidence.) Tj ET
+BT /F1 11 Tf 84 268 Td (- Baseline: BM25 keyword retrieval plus transparent lexical answer extraction.) Tj ET
+BT /F1 11 Tf 84 253 Td (- Transformer extension: dense sentence-transformer retrieval and a fine-tuned) Tj ET
+BT /F1 11 Tf 84 238 Td (  Legal-BERT extractive QA reader.) Tj ET
+q 0.82 0.82 0.82 RG 72 54 468 0 l S Q
+BT /F1 8 Tf 520 38 Td (1) Tj ET
+endstream
+endobj
+4 0 obj
+<< /Type /Page /Parent 11 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 3 0 R >>
+endobj
+5 0 obj
+<< /Length 2555 >>
+stream
+BT /F2 18 Tf 72 742 Td (Dataset Description and Methodology) Tj ET
+BT /F2 15 Tf 72 708 Td (Dataset Description) Tj ET
+BT /F1 11 Tf 72 686 Td (The project uses a self-created legal QA CSV dataset with manually prepared contract-) Tj ET
+BT /F1 11 Tf 72 671 Td (style clauses, questions, expected answers, and evidence spans. The current dataset) Tj ET
+BT /F1 11 Tf 72 656 Td (contains 75 question-answer examples across multiple legal clause categories. The) Tj ET
+BT /F1 11 Tf 72 641 Td (application also supports uploading custom QA CSV files and loading CUAD-style legal QA) Tj ET
+BT /F1 11 Tf 72 626 Td (data.) Tj ET
+BT /F1 11 Tf 84 611 Td (- Self-created examples cover confidentiality, payment, termination, data) Tj ET
+BT /F1 11 Tf 84 596 Td (  protection, lease, software service, and consulting clauses.) Tj ET
+BT /F1 11 Tf 84 581 Td (- The dataset includes hard negative no-answer questions whose wording overlaps with) Tj ET
+BT /F1 11 Tf 84 566 Td (  real contract clauses.) Tj ET
+BT /F2 15 Tf 72 543 Td (System Pipeline) Tj ET
+BT /F1 11 Tf 84 521 Td (- Document loading supports TXT, Markdown, PDF, and DOCX files.) Tj ET
+BT /F1 11 Tf 84 506 Td (- Chunking splits legal text into traceable passages with source metadata and) Tj ET
+BT /F1 11 Tf 84 491 Td (  section context.) Tj ET
+BT /F1 11 Tf 84 476 Td (- Retrieval ranks candidate clauses using BM25 or optional dense sentence-) Tj ET
+BT /F1 11 Tf 84 461 Td (  transformer embeddings.) Tj ET
+BT /F1 11 Tf 84 446 Td (- Answering uses either a lexical baseline or a Hugging Face extractive QA reader.) Tj ET
+BT /F1 11 Tf 84 431 Td (- The Streamlit interface exposes model settings, top-k retrieval, dataset upload,) Tj ET
+BT /F1 11 Tf 84 416 Td (  and baseline comparison.) Tj ET
+BT /F2 15 Tf 72 393 Td (Implementation Details) Tj ET
+BT /F1 11 Tf 72 371 Td (The code is organized into separate modules for loading, tokenization, chunking,) Tj ET
+BT /F1 11 Tf 72 356 Td (retrieval, reading, and orchestration. This structure keeps the project reproducible and) Tj ET
+BT /F1 11 Tf 72 341 Td (makes it possible to compare baseline retrieval against stronger transformer-based) Tj ET
+BT /F1 11 Tf 72 326 Td (settings.) Tj ET
+BT /F1 11 Tf 84 311 Td (- Improved chunking keeps numbered legal headings attached to the following clause) Tj ET
+BT /F1 11 Tf 84 296 Td (  text.) Tj ET
+BT /F1 11 Tf 84 281 Td (- Transformer answer spans are post-processed to trim extra punctuation and) Tj ET
+BT /F1 11 Tf 84 266 Td (  whitespace.) Tj ET
+q 0.82 0.82 0.82 RG 72 54 468 0 l S Q
+BT /F1 8 Tf 520 38 Td (2) Tj ET
+endstream
+endobj
+6 0 obj
+<< /Type /Page /Parent 11 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 5 0 R >>
+endobj
+7 0 obj
+<< /Length 2924 >>
+stream
+BT /F2 18 Tf 72 742 Td (Evaluation and Results) Tj ET
+BT /F2 15 Tf 72 708 Td (Evaluation Setup) Tj ET
+BT /F1 11 Tf 72 686 Td (Evaluation was run over the local QA CSV. For each question, the system retrieved the) Tj ET
+BT /F1 11 Tf 72 671 Td (top three chunks and generated an answer. A prediction was counted as correct when the) Tj ET
+BT /F1 11 Tf 72 656 Td (expected answer or expected evidence span appeared in the returned answer/evidence text.) Tj ET
+BT /F1 11 Tf 72 641 Td (Token F1 was also computed between the expected answer and predicted answer.) Tj ET
+q 0.96 0.98 1 rg 72 555 140 70 re f Q
+q 0.74 0.82 0.93 RG 72 555 140 70 re S Q
+BT /F1 9 Tf 82 605 Td (Correct answers) Tj ET
+BT /F2 18 Tf 82 571 Td (75/75) Tj ET
+q 0.96 0.98 1 rg 236 555 140 70 re f Q
+q 0.74 0.82 0.93 RG 236 555 140 70 re S Q
+BT /F1 9 Tf 246 605 Td (Answer match) Tj ET
+BT /F2 18 Tf 246 571 Td (40%) Tj ET
+q 0.96 0.98 1 rg 400 555 140 70 re f Q
+q 0.74 0.82 0.93 RG 400 555 140 70 re S Q
+BT /F1 9 Tf 410 605 Td (Evidence match) Tj ET
+BT /F2 18 Tf 410 571 Td (77%) Tj ET
+BT /F2 15 Tf 72 520 Td (CSV Results Snapshot) Tj ET
+q 0.92 0.95 0.99 rg 68 494 470 18 re f Q
+BT /F2 9 Tf 72 498 Td (Method) Tj ET
+BT /F2 9 Tf 237 498 Td (Correct) Tj ET
+BT /F2 9 Tf 317 498 Td (Accuracy) Tj ET
+BT /F2 9 Tf 397 498 Td (Evidence) Tj ET
+BT /F2 9 Tf 477 498 Td (Token F1) Tj ET
+BT /F1 9 Tf 72 478 Td (bm25+lexical) Tj ET
+BT /F1 9 Tf 237 478 Td (75/75) Tj ET
+BT /F1 9 Tf 317 478 Td (100.0%) Tj ET
+BT /F1 9 Tf 397 478 Td (77.3%) Tj ET
+BT /F1 9 Tf 477 478 Td (60.5%) Tj ET
+BT /F1 9 Tf 72 462 Td (dense+lexical) Tj ET
+BT /F1 9 Tf 237 462 Td (73/75) Tj ET
+BT /F1 9 Tf 317 462 Td (97.3%) Tj ET
+BT /F1 9 Tf 397 462 Td (74.7%) Tj ET
+BT /F1 9 Tf 477 462 Td (59.5%) Tj ET
+BT /F1 9 Tf 72 446 Td (bm25+transformers) Tj ET
+BT /F1 9 Tf 237 446 Td (75/75) Tj ET
+BT /F1 9 Tf 317 446 Td (100.0%) Tj ET
+BT /F1 9 Tf 397 446 Td (77.3%) Tj ET
+BT /F1 9 Tf 477 446 Td (80.8%) Tj ET
+BT /F1 9 Tf 72 430 Td (dense+transformers) Tj ET
+BT /F1 9 Tf 237 430 Td (74/75) Tj ET
+BT /F1 9 Tf 317 430 Td (98.7%) Tj ET
+BT /F1 9 Tf 397 430 Td (76.0%) Tj ET
+BT /F1 9 Tf 477 430 Td (77.9%) Tj ET
+BT /F1 9 Tf 72 414 Td (bm25+legal-bert) Tj ET
+BT /F1 9 Tf 237 414 Td (75/75) Tj ET
+BT /F1 9 Tf 317 414 Td (100.0%) Tj ET
+BT /F1 9 Tf 397 414 Td (77.3%) Tj ET
+BT /F1 9 Tf 477 414 Td (63.2%) Tj ET
+BT /F2 15 Tf 72 390 Td (Error Analysis) Tj ET
+BT /F1 11 Tf 84 368 Td (- Answerability detection improved the No-Answer category to 17/17 correct, 0) Tj ET
+BT /F1 11 Tf 84 353 Td (  errors, accuracy 100%.) Tj ET
+BT /F1 11 Tf 84 338 Td (- All answerable clause categories were retrieved correctly in the current CSV) Tj ET
+BT /F1 11 Tf 84 323 Td (  evaluation.) Tj ET
+BT /F1 11 Tf 84 308 Td (- This shows that the system now finds stated clauses and rejects unsupported) Tj ET
+BT /F1 11 Tf 84 293 Td (  questions on the project dataset.) Tj ET
+q 0.82 0.82 0.82 RG 72 54 468 0 l S Q
+BT /F1 8 Tf 520 38 Td (3) Tj ET
+endstream
+endobj
+8 0 obj
+<< /Type /Page /Parent 11 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 7 0 R >>
+endobj
+9 0 obj
+<< /Length 2617 >>
+stream
+BT /F2 18 Tf 72 742 Td (Challenges, Limitations, and Improvements) Tj ET
+BT /F2 15 Tf 72 708 Td (Results Interpretation) Tj ET
+BT /F1 11 Tf 72 686 Td (The baseline performs strongly on the prepared dataset because the questions are tightly) Tj ET
+BT /F1 11 Tf 72 671 Td (grounded in specific legal clauses and the expected evidence spans are present in the) Tj ET
+BT /F1 11 Tf 72 656 Td (indexed text. This validates the retrieval and evidence-grounding workflow, while still) Tj ET
+BT /F1 11 Tf 72 641 Td (leaving room for deeper transformer evaluation on larger public legal QA datasets.) Tj ET
+BT /F2 15 Tf 72 618 Td (Challenges and Limitations) Tj ET
+BT /F1 11 Tf 84 596 Td (- The self-created dataset is useful for demonstration, but still small for robust) Tj ET
+BT /F1 11 Tf 84 581 Td (  model claims.) Tj ET
+BT /F1 11 Tf 84 566 Td (- The lexical baseline can copy relevant evidence, but it does not deeply reason) Tj ET
+BT /F1 11 Tf 84 551 Td (  over multiple clauses.) Tj ET
+BT /F1 11 Tf 84 536 Td (- Transformer and dense embedding modes require optional model downloads and) Tj ET
+BT /F1 11 Tf 84 521 Td (  stronger runtime resources.) Tj ET
+BT /F1 11 Tf 84 506 Td (- The current evaluation uses evidence matching and token F1.) Tj ET
+BT /F2 15 Tf 72 483 Td (How the Project Was Strengthened) Tj ET
+BT /F1 11 Tf 84 461 Td (- Expanded the manually labeled dataset to include more contract types and harder) Tj ET
+BT /F1 11 Tf 84 446 Td (  no-answer questions.) Tj ET
+BT /F1 11 Tf 84 431 Td (- Improved retrieval input quality with section-aware legal chunking.) Tj ET
+BT /F1 11 Tf 84 416 Td (- Added answer post-processing for transformer spans to remove noisy boundary) Tj ET
+BT /F1 11 Tf 84 401 Td (  punctuation.) Tj ET
+BT /F1 11 Tf 84 386 Td (- Added answerability detection so unsupported questions return Not found instead of) Tj ET
+BT /F1 11 Tf 84 371 Td (  forced answers.) Tj ET
+BT /F1 11 Tf 84 356 Td (- Fine-tuned nlpaueb/legal-bert-base-uncased and saved the project checkpoint under) Tj ET
+BT /F1 11 Tf 84 341 Td (  models/legal-bert-qa.) Tj ET
+BT /F1 11 Tf 84 326 Td (- Added reproducible dataset-level evaluation with CSV outputs and JSON summary) Tj ET
+BT /F1 11 Tf 84 311 Td (  metrics.) Tj ET
+BT /F1 11 Tf 84 296 Td (- Added same-split method comparison across BM25, dense retrieval, lexical QA, and) Tj ET
+BT /F1 11 Tf 84 281 Td (  transformer QA.) Tj ET
+BT /F1 11 Tf 84 266 Td (- Added clause-type error analysis to show where the system fails, especially no-) Tj ET
+BT /F1 11 Tf 84 251 Td (  answer questions.) Tj ET
+q 0.82 0.82 0.82 RG 72 54 468 0 l S Q
+BT /F1 8 Tf 520 38 Td (4) Tj ET
+endstream
+endobj
+10 0 obj
+<< /Type /Page /Parent 11 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 9 0 R >>
+endobj
+11 0 obj
+<< /Type /Pages /Kids [4 0 R 6 0 R 8 0 R 10 0 R] /Count 4 >>
+endobj
+12 0 obj
+<< /Type /Catalog /Pages 11 0 R >>
+endobj
+xref
+0 13
+0000000000 65535 f 
+0000000015 00000 n 
+0000000085 00000 n 
+0000000160 00000 n 
+0000002719 00000 n 
+0000002856 00000 n 
+0000005463 00000 n 
+0000005600 00000 n 
+0000008576 00000 n 
+0000008713 00000 n 
+0000011382 00000 n 
+0000011520 00000 n 
+0000011597 00000 n 
+trailer
+<< /Size 13 /Root 12 0 R >>
+startxref
+11648
+%%EOF

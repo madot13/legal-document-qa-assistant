@@ -8,6 +8,7 @@ ENV HOME=/home/user \
     PATH=/home/user/.local/bin:$PATH \
     HF_HOME=/home/user/.cache/huggingface \
     TRANSFORMERS_CACHE=/home/user/.cache/huggingface/transformers \
+    LEGAL_QA_ALLOW_MODEL_DOWNLOADS=1 \
     PIP_NO_CACHE_DIR=1
 
 WORKDIR $HOME/app

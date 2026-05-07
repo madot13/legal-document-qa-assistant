@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import math
+import os
 from collections import Counter
 from collections.abc import Sequence
 
@@ -83,7 +84,8 @@ class DenseRetriever:
         self._np = np
         self.chunks = list(chunks)
         self.model_name = model_name
-        self.model = SentenceTransformer(model_name)
+        allow_downloads = os.environ.get("LEGAL_QA_ALLOW_MODEL_DOWNLOADS") == "1"
+        self.model = SentenceTransformer(model_name, local_files_only=not allow_downloads)
         self.embeddings = self.model.encode(
             [chunk.text for chunk in self.chunks],
             normalize_embeddings=True,

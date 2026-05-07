@@ -26,7 +26,7 @@ def chunk_text(
     if overlap_tokens >= max_tokens:
         raise ValueError("overlap_tokens must be smaller than max_tokens")
 
-    paragraphs = _paragraphs_with_offsets(text)
+    paragraphs = _merge_section_headings(_paragraphs_with_offsets(text))
     chunks: list[DocumentChunk] = []
     section_title = ""
 
@@ -204,6 +204,38 @@ def _section_title(paragraph: str) -> str:
         return ""
     match = SECTION_PATTERN.match(first_line)
     return first_line if match else ""
+
+
+def _is_standalone_heading(paragraph: str) -> bool:
+    if len(paragraph) > 120 or len(paragraph.split()) > 12:
+        return False
+    return bool(re.match(r"^\s*(?:section\s+)?\d+(?:\.\d+)*\.?\s+.+$", paragraph, re.I))
+
+
+def _merge_section_headings(paragraphs: list[tuple[str, int, int]]) -> list[tuple[str, int, int]]:
+    """Attach short legal section headings to the following clause text."""
+
+    merged: list[tuple[str, int, int]] = []
+    pending_heading: tuple[str, int, int] | None = None
+
+    for paragraph, start, end in paragraphs:
+        if _is_standalone_heading(paragraph):
+            if pending_heading:
+                merged.append(pending_heading)
+            pending_heading = (paragraph, start, end)
+            continue
+
+        if pending_heading:
+            heading, heading_start, _ = pending_heading
+            merged.append((f"{heading} {paragraph}", heading_start, end))
+            pending_heading = None
+        else:
+            merged.append((paragraph, start, end))
+
+    if pending_heading:
+        merged.append(pending_heading)
+
+    return merged
 
 
 def _make_chunk(

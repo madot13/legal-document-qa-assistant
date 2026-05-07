@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import os
+import re
 import tempfile
 from pathlib import Path
 import pandas as pd
@@ -9,6 +11,32 @@ import streamlit as st
 from legal_qa.assistant import LegalQAAssistant
 from legal_qa.document_loader import DocumentLoadError, load_text
 from legal_qa.cuad_adapter import CUADAdapter
+
+
+DEFAULT_QA_MODEL = os.environ.get(
+    "LEGAL_QA_MODEL",
+    "models/legal-bert-qa" if Path("models/legal-bert-qa").exists() else "deepset/roberta-base-squad2",
+)
+DEFAULT_EMBEDDING_MODEL = os.environ.get(
+    "LEGAL_QA_EMBEDDING_MODEL",
+    "sentence-transformers/all-MiniLM-L6-v2",
+)
+
+
+def normalize_for_comparison(text: object) -> str:
+    return re.sub(r"\s+", " ", str(text or "")).strip().lower()
+
+
+def answer_matches_expected(expected_answer: object, expected_evidence: object, result) -> bool:
+    expected_answer_text = normalize_for_comparison(expected_answer)
+    expected_evidence_text = normalize_for_comparison(expected_evidence)
+    result_text = normalize_for_comparison(f"{result.answer} {result.evidence}")
+
+    expected_candidates = [text for text in [expected_answer_text, expected_evidence_text] if text]
+    return any(
+        expected in result_text or result_text in expected
+        for expected in expected_candidates
+    )
 
 
 def load_qa_dataset(csv_file):
@@ -188,16 +216,16 @@ with st.sidebar:
     
     # Show embedding model only for dense retriever
     if retriever == "dense":
-        embedding_model = st.text_input("Embedding model", value="sentence-transformers/all-MiniLM-L6-v2")
+        embedding_model = st.text_input("Embedding model", value=DEFAULT_EMBEDDING_MODEL)
     else:
-        embedding_model = "sentence-transformers/all-MiniLM-L6-v2"  # Keep default for consistency
+        embedding_model = DEFAULT_EMBEDDING_MODEL
         st.info("Embedding model is not used for BM25 retrieval.")
     
     # Show QA model only for transformer reader
     if reader == "transformers":
-        qa_model = st.text_input("QA model", value="deepset/roberta-base-squad2")
+        qa_model = st.text_input("QA model", value=DEFAULT_QA_MODEL)
     else:
-        qa_model = "deepset/roberta-base-squad2"  # Keep default for consistency
+        qa_model = DEFAULT_QA_MODEL
         st.info("QA model is not used for lexical reader.")
     
     # Comparison mode
@@ -328,8 +356,7 @@ if result is not None and qa_dataset is not None and question:
             st.write(f"**Answer:** {expected_answer}")
             st.write(f"**Evidence:** {expected_evidence}")
             
-            # Simple comparison
-            if expected_answer.lower().strip() in result.answer.lower().strip() or result.answer.lower().strip() in expected_answer.lower().strip():
+            if answer_matches_expected(expected_answer, expected_evidence, result):
                 st.success("✓ Answer matches expected result!")
             else:
                 st.warning("⚠ Answer differs from expected result")
@@ -344,8 +371,7 @@ if result is not None and qa_dataset is not None and question:
             st.write(f"**Answer:** {expected_answer}")
             st.write(f"**Evidence:** {expected_evidence}")
             
-            # Simple comparison
-            if expected_answer.lower().strip() in result.answer.lower().strip() or result.answer.lower().strip() in expected_answer.lower().strip():
+            if answer_matches_expected(expected_answer, expected_evidence, result):
                 st.success("✓ Answer matches expected result!")
             else:
                 st.warning("⚠ Answer differs from expected result")

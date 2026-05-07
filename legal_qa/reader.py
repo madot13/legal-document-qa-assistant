@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import re
 from collections.abc import Sequence
 from dataclasses import dataclass
@@ -9,6 +10,76 @@ from legal_qa.types import RetrievalResult
 
 
 NOT_FOUND_ANSWER = "Not found in the provided document."
+QUESTION_GENERIC_TERMS = {
+    "about",
+    "action",
+    "agreement",
+    "allow",
+    "allowed",
+    "answer",
+    "any",
+    "apply",
+    "ask",
+    "before",
+    "begin",
+    "between",
+    "cap",
+    "clause",
+    "contract",
+    "could",
+    "deliverable",
+    "document",
+    "does",
+    "during",
+    "event",
+    "exclud",
+    "free",
+    "freely",
+    "govern",
+    "happen",
+    "include",
+    "includ",
+    "large",
+    "last",
+    "law",
+    "leas",
+    "legislation",
+    "long",
+    "many",
+    "may",
+    "miss",
+    "much",
+    "must",
+    "non-payment",
+    "often",
+    "other",
+    "own",
+    "party",
+    "period",
+    "promise",
+    "prohibit",
+    "provide",
+    "purpose",
+    "question",
+    "quickly",
+    "require",
+    "required",
+    "requir",
+    "responsible",
+    "section",
+    "service",
+    "set",
+    "specific",
+    "term",
+    "third-party",
+    "time",
+    "type",
+    "use",
+    "used",
+    "using",
+    "weekly",
+    "work",
+}
 
 
 @dataclass(frozen=True)
@@ -31,6 +102,9 @@ class LexicalReader:
 
         best_retrieval = retrievals[0]
         if best_retrieval.score < 0.1:
+            return ReaderOutput(NOT_FOUND_ANSWER, 0.0, "", self.model_name, False)
+
+        if not _is_answerable(question, retrievals):
             return ReaderOutput(NOT_FOUND_ANSWER, 0.0, "", self.model_name, False)
 
         evidence = self._best_sentence(question, best_retrieval.chunk.text) or best_retrieval.chunk.text
@@ -85,12 +159,16 @@ class TransformersReader:
 
         self.model_name = model_name
         self._torch = torch
-        self._tokenizer = AutoTokenizer.from_pretrained(model_name)
-        self._model = AutoModelForQuestionAnswering.from_pretrained(model_name)
+        allow_downloads = os.environ.get("LEGAL_QA_ALLOW_MODEL_DOWNLOADS") == "1"
+        self._tokenizer = AutoTokenizer.from_pretrained(model_name, local_files_only=not allow_downloads)
+        self._model = AutoModelForQuestionAnswering.from_pretrained(model_name, local_files_only=not allow_downloads)
         self._model.eval()
 
     def answer(self, question: str, retrievals: Sequence[RetrievalResult]) -> ReaderOutput:
         if not retrievals:
+            return ReaderOutput(NOT_FOUND_ANSWER, 0.0, "", self.model_name, False)
+
+        if not _is_answerable(question, retrievals):
             return ReaderOutput(NOT_FOUND_ANSWER, 0.0, "", self.model_name, False)
 
         context = "\n\n".join(item.chunk.text for item in retrievals)
@@ -114,15 +192,14 @@ class TransformersReader:
             start_index, end_index = end_index, start_index
 
         answer_ids = inputs["input_ids"][0][start_index : end_index + 1]
-        answer = self._tokenizer.decode(answer_ids, skip_special_tokens=True).strip()
+        answer = _post_process_answer_span(self._tokenizer.decode(answer_ids, skip_special_tokens=True))
         confidence = float(start_scores[start_index] * end_scores[end_index])
 
         # Low confidence fallback
         if not answer or confidence < 0.15:
-            # Use best retrieval as fallback
             best_retrieval = retrievals[0]
-            fallback_answer = best_retrieval.chunk.text
             fallback_evidence = best_retrieval.chunk.text
+            fallback_answer = _best_fallback_answer(question, fallback_evidence)
             return ReaderOutput(
                 answer=fallback_answer,
                 confidence=best_retrieval.score,
@@ -173,3 +250,75 @@ def _sentence_containing_answer(context: str, answer: str) -> str:
         if answer_lower in sentence.lower():
             return sentence
     return ""
+
+
+def _best_fallback_answer(question: str, evidence: str) -> str:
+    question_terms = set(tokenize(question))
+    best_sentence = ""
+    best_score = -1.0
+
+    for sentence in sentence_split(evidence) or [evidence]:
+        sentence_terms = set(tokenize(sentence))
+        if not sentence_terms:
+            continue
+        overlap = len(question_terms & sentence_terms)
+        score = (2 * overlap / max(1, len(question_terms))) + (overlap / max(1, len(sentence_terms)))
+        if score > best_score:
+            best_score = score
+            best_sentence = sentence
+
+    return _strip_section_prefix(best_sentence or evidence)
+
+
+def _strip_section_prefix(text: str) -> str:
+    text = re.sub(r"^=+\s*Section\s+\d+:\s*[^=]+===\s*", "", text).strip()
+    text = re.sub(r"^[A-Z][A-Za-z ]{2,40}:\s+", "", text).strip()
+    return text
+
+
+def _is_answerable(question: str, retrievals: Sequence[RetrievalResult]) -> bool:
+    question_terms = _specific_question_terms(question)
+    if not question_terms:
+        return True
+
+    evidence_terms = set(tokenize(" ".join(item.chunk.text for item in retrievals)))
+    supported_terms = {term for term in question_terms if _term_supported(term, evidence_terms)}
+    missing_terms = question_terms - supported_terms
+    coverage = len(supported_terms) / len(question_terms)
+
+    if len(question_terms) >= 2 and coverage < 0.5:
+        return False
+    if len(missing_terms) >= 2 and coverage <= 0.6:
+        return False
+    if _is_yes_no_question(question) and missing_terms and coverage < 0.8:
+        return False
+    if any(len(term) >= 8 for term in missing_terms) and coverage < 0.75:
+        return False
+    return True
+
+
+def _specific_question_terms(question: str) -> set[str]:
+    return {
+        term
+        for term in tokenize(question)
+        if len(term) > 2 and term not in QUESTION_GENERIC_TERMS
+    }
+
+
+def _term_supported(term: str, evidence_terms: set[str]) -> bool:
+    if term in evidence_terms or f"{term}e" in evidence_terms:
+        return True
+    if len(term) <= 5:
+        return False
+    return any(
+        abs(len(evidence_term) - len(term)) <= 2
+        and (evidence_term.startswith(term) or term.startswith(evidence_term))
+        for evidence_term in evidence_terms
+    )
+
+
+def _post_process_answer_span(answer: str) -> str:
+    answer = re.sub(r"\s+", " ", answer).strip()
+    answer = answer.strip(" \t\r\n\"'`.,;:()[]{}")
+    answer = re.sub(r"\s+([,.;:!?])", r"\1", answer)
+    return answer

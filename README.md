@@ -14,6 +14,10 @@ datasets:
   - theatticusproject/cuad
 ---
 
+# Demo link
+
+https://madot12-legal-doc-qa-assistant.hf.space
+
 # Legal Document QA Assistant
 
 Evidence-grounded question answering over legal documents and contracts.
@@ -54,6 +58,18 @@ tests/
 
 - Python 3.9+
 - Git
+
+### Hugging Face Spaces Deployment
+
+This repository is ready for a Docker-based Hugging Face Space. Create a new Space with `sdk: docker`, then push this repository to the Space repo. The included `Dockerfile` runs Streamlit on port `7860`, matching the `app_port: 7860` setting in this README metadata.
+
+For the fine-tuned Legal-BERT checkpoint, use a separate Hugging Face model repository and set this Space variable:
+
+```text
+LEGAL_QA_MODEL=<your-username-or-org>/legal-bert-qa
+```
+
+The Docker image sets `LEGAL_QA_ALLOW_MODEL_DOWNLOADS=1`, so the Space can download the configured model at runtime. The local `models/` and `.hf_cache/` folders are intentionally ignored by git because they are large generated artifacts.
 
 ### Installation
 

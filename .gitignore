@@ -41,6 +41,8 @@ logs/
 # Data files (keep structure but ignore sensitive data)
 data/*.tmp
 data/cache/
+.hf_cache/
+models/
 
 # Jupyter
 .ipynb_checkpoints/
