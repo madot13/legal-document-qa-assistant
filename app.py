@@ -117,6 +117,7 @@ qa_dataset = st.session_state.qa_dataset
 cuad_adapter = st.session_state.cuad_adapter
 document_text = st.session_state.document_text
 question = ""
+selected_dataset_row = None
 assistant = None
 result = None
 
@@ -136,11 +137,12 @@ elif input_mode == "Upload QA Dataset (CSV)":
             question_options = qa_dataset['question'].tolist()
             selected_question_idx = st.selectbox("Select a question:", range(len(question_options)), format_func=lambda i: f"{i+1}. {question_options[i]}")
             question = question_options[selected_question_idx]
+            selected_dataset_row = qa_dataset.iloc[selected_question_idx]
             
             # Show expected answer for comparison
             with st.expander("Expected Answer"):
-                st.write("**Answer:**", qa_dataset.iloc[selected_question_idx]['answer'])
-                st.write("**Evidence:**", qa_dataset.iloc[selected_question_idx]['evidence'])
+                st.write("**Answer:**", selected_dataset_row['answer'])
+                st.write("**Evidence:**", selected_dataset_row['evidence'])
         else:
             st.stop()
             
@@ -177,23 +179,29 @@ elif input_mode == "Load CUAD Dataset":
         st.subheader("Available Questions:")
         question_options = filtered_df['question'].tolist()
         if question_options:
-            selected_question_idx = st.selectbox("Select a question:", range(len(question_options)), format_func=lambda i: f"{i+1}. {question_options[i][:100]}...")
+            def format_cuad_option(i):
+                row = filtered_df.iloc[i]
+                title = str(row.get('title', 'Untitled'))[:60]
+                answer = str(row.get('answer', 'No answer'))[:80]
+                return f"{i+1}. {row['question'][:80]}... | {title} | {answer}"
+
+            selected_question_idx = st.selectbox("Select a question:", range(len(question_options)), format_func=format_cuad_option)
             question = question_options[selected_question_idx]
             
             # Get the specific QA pair for comparison
-            selected_row = filtered_df.iloc[selected_question_idx]
+            selected_dataset_row = filtered_df.iloc[selected_question_idx]
             
             # Show expected answer for comparison
             with st.expander("Expected Answer"):
-                st.write("**Category:**", selected_row['category'])
-                st.write("**Answer:**", selected_row['answer'])
-                st.write("**Evidence:**", selected_row['evidence'])
-                st.write("**Document:**", selected_row['title'][:50] + "..." if len(selected_row['title']) > 50 else selected_row['title'])
+                st.write("**Category:**", selected_dataset_row['category'])
+                st.write("**Answer:**", selected_dataset_row['answer'])
+                st.write("**Evidence:**", selected_dataset_row['evidence'])
+                st.write("**Document:**", selected_dataset_row['title'][:50] + "..." if len(selected_dataset_row['title']) > 50 else selected_dataset_row['title'])
                 
                 # Show original CUAD question for reference
-                if 'original_question' in selected_row:
+                if 'original_question' in selected_dataset_row:
                     with st.expander("Original CUAD Question"):
-                        st.write(selected_row['original_question'])
+                        st.write(selected_dataset_row['original_question'])
         
         # Add reset button
         if st.button("Reset CUAD Dataset"):
@@ -257,11 +265,14 @@ if (uploaded_file and question) or (qa_dataset is not None and question):
             temporary_path.unlink(missing_ok=True)
         else:
             # Handle CSV or CUAD dataset
-            text = document_text
             if input_mode == "Upload QA Dataset (CSV)":
+                text = document_text
                 source_name = uploaded_csv.name if uploaded_csv else "QA Dataset"
             else:
-                source_name = "CUAD Dataset"
+                selected_context = selected_dataset_row.get('context') if selected_dataset_row is not None else ""
+                text = selected_context or document_text
+                selected_title = selected_dataset_row.get('title') if selected_dataset_row is not None else ""
+                source_name = f"CUAD Dataset: {selected_title}" if selected_title else "CUAD Dataset"
 
         if compare_mode and reader == "transformers":
             # Run both baseline and transformer for comparison
@@ -354,12 +365,12 @@ if result is not None and not (compare_mode and reader == "transformers"):
 # If using CSV or CUAD dataset, show comparison with expected answer
 if result is not None and qa_dataset is not None and question:
     if input_mode == "Load CUAD Dataset":
-        # For CUAD, we need to find the exact match
-        expected_row = qa_dataset[qa_dataset['question'] == question]
-        if not expected_row.empty:
-            expected_answer = expected_row.iloc[0]['answer']
-            expected_evidence = expected_row.iloc[0]['evidence']
-            category = expected_row.iloc[0]['category']
+        # CUAD has repeated category-style questions, so compare with the row
+        # selected in the dropdown instead of the first matching question text.
+        if selected_dataset_row is not None:
+            expected_answer = selected_dataset_row['answer']
+            expected_evidence = selected_dataset_row['evidence']
+            category = selected_dataset_row['category']
             
             st.subheader("Expected Answer (from CUAD)")
             st.write(f"**Category:** {category}")
@@ -372,10 +383,9 @@ if result is not None and qa_dataset is not None and question:
                 st.warning("⚠ Answer differs from expected result")
     else:
         # For CSV dataset
-        expected_row = qa_dataset[qa_dataset['question'] == question]
-        if not expected_row.empty:
-            expected_answer = expected_row.iloc[0]['answer']
-            expected_evidence = expected_row.iloc[0]['evidence']
+        if selected_dataset_row is not None:
+            expected_answer = selected_dataset_row['answer']
+            expected_evidence = selected_dataset_row['evidence']
             
             st.subheader("Expected Answer (from dataset)")
             st.write(f"**Answer:** {expected_answer}")
