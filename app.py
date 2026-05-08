@@ -15,7 +15,7 @@ from legal_qa.cuad_adapter import CUADAdapter
 
 DEFAULT_QA_MODEL = os.environ.get(
     "LEGAL_QA_MODEL",
-    "models/legal-bert-qa" if Path("models/legal-bert-qa").exists() else "deepset/roberta-base-squad2",
+    "models/legal-bert-qa" if Path("models/legal-bert-qa").exists() else "madot12/legal-bert-qa",
 )
 DEFAULT_EMBEDDING_MODEL = os.environ.get(
     "LEGAL_QA_EMBEDDING_MODEL",

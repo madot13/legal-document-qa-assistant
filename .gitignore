@@ -49,3 +49,4 @@ models/
 
 # Streamlit
 .streamlit/
+legal-bert-base-cuad-model/
