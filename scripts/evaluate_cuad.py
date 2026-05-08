@@ -219,6 +219,11 @@ def available_methods(args: argparse.Namespace) -> list[tuple[str, str, str, str
         ("bm25+transformers", "bm25", "transformers", None),
         ("dense+transformers", "dense", "transformers", None),
     ]
+    if args.qa_model:
+        model_label = args.qa_model.split("/")[-1]
+        methods.append((f"bm25+{model_label}", "bm25", "transformers", args.qa_model))
+        methods.append((f"dense+{model_label}", "dense", "transformers", args.qa_model))
+
     legal_bert = ROOT / "models" / "legal-bert-qa"
     if legal_bert.exists():
         methods.append(("bm25+legal-bert", "bm25", "transformers", str(legal_bert)))
@@ -248,6 +253,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--local-json", type=Path, help="Optional local CUAD_v1.json path.")
     parser.add_argument("--demo", action="store_true", help="Use built-in demo CUAD-style examples.")
     parser.add_argument("--demo-on-fail", action="store_true", help="Use demo examples if Hugging Face CUAD loading fails.")
+    parser.add_argument("--qa-model", help="Optional Hugging Face/local QA model to include in comparison.")
     parser.add_argument(
         "--context-mode",
         choices=["evidence-context", "gold-context", "full-document", "all"],
