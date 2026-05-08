@@ -1,0 +1,237 @@
+{
+  "dataset": "data/leqal_qa_dataset.csv",
+  "total_questions": 75,
+  "correct": 75,
+  "accuracy": 1.0,
+  "answer_match_rate": 0.4,
+  "evidence_match_rate": 0.7733333333333333,
+  "no_answer_match_rate": 0.22666666666666666,
+  "average_token_f1": 0.6048393828813906,
+  "retriever": "bm25",
+  "reader": "lexical",
+  "top_k": 3,
+  "category_accuracy": {
+    "Assignment": {
+      "correct": 2,
+      "total": 2,
+      "accuracy": 1.0
+    },
+    "Audit": {
+      "correct": 1,
+      "total": 1,
+      "accuracy": 1.0
+    },
+    "Breach Notification": {
+      "correct": 1,
+      "total": 1,
+      "accuracy": 1.0
+    },
+    "Compensation": {
+      "correct": 1,
+      "total": 1,
+      "accuracy": 1.0
+    },
+    "Confidentiality": {
+      "correct": 7,
+      "total": 7,
+      "accuracy": 1.0
+    },
+    "Data Backup": {
+      "correct": 2,
+      "total": 2,
+      "accuracy": 1.0
+    },
+    "Data Protection": {
+      "correct": 3,
+      "total": 3,
+      "accuracy": 1.0
+    },
+    "Dispute Resolution": {
+      "correct": 2,
+      "total": 2,
+      "accuracy": 1.0
+    },
+    "Expenses": {
+      "correct": 1,
+      "total": 1,
+      "accuracy": 1.0
+    },
+    "Fees": {
+      "correct": 1,
+      "total": 1,
+      "accuracy": 1.0
+    },
+    "Force Majeure": {
+      "correct": 1,
+      "total": 1,
+      "accuracy": 1.0
+    },
+    "Governing Law": {
+      "correct": 4,
+      "total": 4,
+      "accuracy": 1.0
+    },
+    "Intellectual Property": {
+      "correct": 2,
+      "total": 2,
+      "accuracy": 1.0
+    },
+    "Lease Term": {
+      "correct": 2,
+      "total": 2,
+      "accuracy": 1.0
+    },
+    "Liability": {
+      "correct": 4,
+      "total": 4,
+      "accuracy": 1.0
+    },
+    "Milestones": {
+      "correct": 1,
+      "total": 1,
+      "accuracy": 1.0
+    },
+    "No-Answer": {
+      "correct": 17,
+      "total": 17,
+      "accuracy": 1.0
+    },
+    "Non-Compete": {
+      "correct": 1,
+      "total": 1,
+      "accuracy": 1.0
+    },
+    "Non-Solicitation": {
+      "correct": 1,
+      "total": 1,
+      "accuracy": 1.0
+    },
+    "Payment": {
+      "correct": 4,
+      "total": 4,
+      "accuracy": 1.0
+    },
+    "Rent": {
+      "correct": 1,
+      "total": 1,
+      "accuracy": 1.0
+    },
+    "Repairs": {
+      "correct": 1,
+      "total": 1,
+      "accuracy": 1.0
+    },
+    "Retention": {
+      "correct": 1,
+      "total": 1,
+      "accuracy": 1.0
+    },
+    "Scope of Work": {
+      "correct": 1,
+      "total": 1,
+      "accuracy": 1.0
+    },
+    "Security Deposit": {
+      "correct": 1,
+      "total": 1,
+      "accuracy": 1.0
+    },
+    "Service Levels": {
+      "correct": 2,
+      "total": 2,
+      "accuracy": 1.0
+    },
+    "Subprocessors": {
+      "correct": 1,
+      "total": 1,
+      "accuracy": 1.0
+    },
+    "Support": {
+      "correct": 1,
+      "total": 1,
+      "accuracy": 1.0
+    },
+    "Termination": {
+      "correct": 5,
+      "total": 5,
+      "accuracy": 1.0
+    },
+    "Termination Assistance": {
+      "correct": 1,
+      "total": 1,
+      "accuracy": 1.0
+    },
+    "Use Restrictions": {
+      "correct": 1,
+      "total": 1,
+      "accuracy": 1.0
+    },
+    "Working Hours": {
+      "correct": 1,
+      "total": 1,
+      "accuracy": 1.0
+    }
+  },
+  "method_comparison": [
+    {
+      "method": "bm25+lexical",
+      "status": "ok",
+      "correct": 75,
+      "total_questions": 75,
+      "accuracy": 1.0,
+      "answer_match_rate": 0.4,
+      "evidence_match_rate": 0.7733,
+      "no_answer_match_rate": 0.2267,
+      "average_token_f1": 0.6048,
+      "note": ""
+    },
+    {
+      "method": "dense+lexical",
+      "status": "ok",
+      "correct": 73,
+      "total_questions": 75,
+      "accuracy": 0.9733,
+      "answer_match_rate": 0.3867,
+      "evidence_match_rate": 0.7467,
+      "no_answer_match_rate": 0.2267,
+      "average_token_f1": 0.5952,
+      "note": ""
+    },
+    {
+      "method": "bm25+transformers",
+      "status": "ok",
+      "correct": 58,
+      "total_questions": 75,
+      "accuracy": 0.7733,
+      "answer_match_rate": 0.4,
+      "evidence_match_rate": 0.7733,
+      "no_answer_match_rate": 0.0,
+      "average_token_f1": 0.584,
+      "note": ""
+    },
+    {
+      "method": "dense+transformers",
+      "status": "ok",
+      "correct": 58,
+      "total_questions": 75,
+      "accuracy": 0.7733,
+      "answer_match_rate": 0.4,
+      "evidence_match_rate": 0.7733,
+      "no_answer_match_rate": 0.0,
+      "average_token_f1": 0.5616,
+      "note": ""
+    },
+    {
+      "method": "bm25+legal-bert",
+      "status": "ok",
+      "correct": 54,
+      "total_questions": 75,
+      "accuracy": 0.72,
+      "answer_match_rate": 0.3867,
+      "evidence_match_rate": 0.72,
+      "no_answer_match_rate": 0.0,
+      "average_token_f1": 0.3813,
+      "note": ""
+    }
+  ]
+}

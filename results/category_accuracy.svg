@@ -1,0 +1,132 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="1182" viewBox="0 0 860 1182">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="24" y="28" font-family="Arial" font-size="18" font-weight="700" fill="#1f2937">Accuracy by legal clause category</text>
+<text x="24" y="66" font-family="Arial" font-size="12" fill="#374151">Assignment</text>
+<rect x="180" y="52" width="560" height="18" rx="4" fill="#e5e7eb"/>
+<rect x="180" y="52" width="560" height="18" rx="4" fill="#2563eb"/>
+<text x="754" y="66" font-family="Arial" font-size="12" fill="#111827">100% (2/2)</text>
+<text x="24" y="100" font-family="Arial" font-size="12" fill="#374151">Audit</text>
+<rect x="180" y="86" width="560" height="18" rx="4" fill="#e5e7eb"/>
+<rect x="180" y="86" width="560" height="18" rx="4" fill="#2563eb"/>
+<text x="754" y="100" font-family="Arial" font-size="12" fill="#111827">100% (1/1)</text>
+<text x="24" y="134" font-family="Arial" font-size="12" fill="#374151">Breach Notification</text>
+<rect x="180" y="120" width="560" height="18" rx="4" fill="#e5e7eb"/>
+<rect x="180" y="120" width="560" height="18" rx="4" fill="#2563eb"/>
+<text x="754" y="134" font-family="Arial" font-size="12" fill="#111827">100% (1/1)</text>
+<text x="24" y="168" font-family="Arial" font-size="12" fill="#374151">Compensation</text>
+<rect x="180" y="154" width="560" height="18" rx="4" fill="#e5e7eb"/>
+<rect x="180" y="154" width="560" height="18" rx="4" fill="#2563eb"/>
+<text x="754" y="168" font-family="Arial" font-size="12" fill="#111827">100% (1/1)</text>
+<text x="24" y="202" font-family="Arial" font-size="12" fill="#374151">Confidentiality</text>
+<rect x="180" y="188" width="560" height="18" rx="4" fill="#e5e7eb"/>
+<rect x="180" y="188" width="560" height="18" rx="4" fill="#2563eb"/>
+<text x="754" y="202" font-family="Arial" font-size="12" fill="#111827">100% (7/7)</text>
+<text x="24" y="236" font-family="Arial" font-size="12" fill="#374151">Data Backup</text>
+<rect x="180" y="222" width="560" height="18" rx="4" fill="#e5e7eb"/>
+<rect x="180" y="222" width="560" height="18" rx="4" fill="#2563eb"/>
+<text x="754" y="236" font-family="Arial" font-size="12" fill="#111827">100% (2/2)</text>
+<text x="24" y="270" font-family="Arial" font-size="12" fill="#374151">Data Protection</text>
+<rect x="180" y="256" width="560" height="18" rx="4" fill="#e5e7eb"/>
+<rect x="180" y="256" width="560" height="18" rx="4" fill="#2563eb"/>
+<text x="754" y="270" font-family="Arial" font-size="12" fill="#111827">100% (3/3)</text>
+<text x="24" y="304" font-family="Arial" font-size="12" fill="#374151">Dispute Resolution</text>
+<rect x="180" y="290" width="560" height="18" rx="4" fill="#e5e7eb"/>
+<rect x="180" y="290" width="560" height="18" rx="4" fill="#2563eb"/>
+<text x="754" y="304" font-family="Arial" font-size="12" fill="#111827">100% (2/2)</text>
+<text x="24" y="338" font-family="Arial" font-size="12" fill="#374151">Expenses</text>
+<rect x="180" y="324" width="560" height="18" rx="4" fill="#e5e7eb"/>
+<rect x="180" y="324" width="560" height="18" rx="4" fill="#2563eb"/>
+<text x="754" y="338" font-family="Arial" font-size="12" fill="#111827">100% (1/1)</text>
+<text x="24" y="372" font-family="Arial" font-size="12" fill="#374151">Fees</text>
+<rect x="180" y="358" width="560" height="18" rx="4" fill="#e5e7eb"/>
+<rect x="180" y="358" width="560" height="18" rx="4" fill="#2563eb"/>
+<text x="754" y="372" font-family="Arial" font-size="12" fill="#111827">100% (1/1)</text>
+<text x="24" y="406" font-family="Arial" font-size="12" fill="#374151">Force Majeure</text>
+<rect x="180" y="392" width="560" height="18" rx="4" fill="#e5e7eb"/>
+<rect x="180" y="392" width="560" height="18" rx="4" fill="#2563eb"/>
+<text x="754" y="406" font-family="Arial" font-size="12" fill="#111827">100% (1/1)</text>
+<text x="24" y="440" font-family="Arial" font-size="12" fill="#374151">Governing Law</text>
+<rect x="180" y="426" width="560" height="18" rx="4" fill="#e5e7eb"/>
+<rect x="180" y="426" width="560" height="18" rx="4" fill="#2563eb"/>
+<text x="754" y="440" font-family="Arial" font-size="12" fill="#111827">100% (4/4)</text>
+<text x="24" y="474" font-family="Arial" font-size="12" fill="#374151">Intellectual Property</text>
+<rect x="180" y="460" width="560" height="18" rx="4" fill="#e5e7eb"/>
+<rect x="180" y="460" width="560" height="18" rx="4" fill="#2563eb"/>
+<text x="754" y="474" font-family="Arial" font-size="12" fill="#111827">100% (2/2)</text>
+<text x="24" y="508" font-family="Arial" font-size="12" fill="#374151">Lease Term</text>
+<rect x="180" y="494" width="560" height="18" rx="4" fill="#e5e7eb"/>
+<rect x="180" y="494" width="560" height="18" rx="4" fill="#2563eb"/>
+<text x="754" y="508" font-family="Arial" font-size="12" fill="#111827">100% (2/2)</text>
+<text x="24" y="542" font-family="Arial" font-size="12" fill="#374151">Liability</text>
+<rect x="180" y="528" width="560" height="18" rx="4" fill="#e5e7eb"/>
+<rect x="180" y="528" width="560" height="18" rx="4" fill="#2563eb"/>
+<text x="754" y="542" font-family="Arial" font-size="12" fill="#111827">100% (4/4)</text>
+<text x="24" y="576" font-family="Arial" font-size="12" fill="#374151">Milestones</text>
+<rect x="180" y="562" width="560" height="18" rx="4" fill="#e5e7eb"/>
+<rect x="180" y="562" width="560" height="18" rx="4" fill="#2563eb"/>
+<text x="754" y="576" font-family="Arial" font-size="12" fill="#111827">100% (1/1)</text>
+<text x="24" y="610" font-family="Arial" font-size="12" fill="#374151">No-Answer</text>
+<rect x="180" y="596" width="560" height="18" rx="4" fill="#e5e7eb"/>
+<rect x="180" y="596" width="560" height="18" rx="4" fill="#2563eb"/>
+<text x="754" y="610" font-family="Arial" font-size="12" fill="#111827">100% (17/17)</text>
+<text x="24" y="644" font-family="Arial" font-size="12" fill="#374151">Non-Compete</text>
+<rect x="180" y="630" width="560" height="18" rx="4" fill="#e5e7eb"/>
+<rect x="180" y="630" width="560" height="18" rx="4" fill="#2563eb"/>
+<text x="754" y="644" font-family="Arial" font-size="12" fill="#111827">100% (1/1)</text>
+<text x="24" y="678" font-family="Arial" font-size="12" fill="#374151">Non-Solicitation</text>
+<rect x="180" y="664" width="560" height="18" rx="4" fill="#e5e7eb"/>
+<rect x="180" y="664" width="560" height="18" rx="4" fill="#2563eb"/>
+<text x="754" y="678" font-family="Arial" font-size="12" fill="#111827">100% (1/1)</text>
+<text x="24" y="712" font-family="Arial" font-size="12" fill="#374151">Payment</text>
+<rect x="180" y="698" width="560" height="18" rx="4" fill="#e5e7eb"/>
+<rect x="180" y="698" width="560" height="18" rx="4" fill="#2563eb"/>
+<text x="754" y="712" font-family="Arial" font-size="12" fill="#111827">100% (4/4)</text>
+<text x="24" y="746" font-family="Arial" font-size="12" fill="#374151">Rent</text>
+<rect x="180" y="732" width="560" height="18" rx="4" fill="#e5e7eb"/>
+<rect x="180" y="732" width="560" height="18" rx="4" fill="#2563eb"/>
+<text x="754" y="746" font-family="Arial" font-size="12" fill="#111827">100% (1/1)</text>
+<text x="24" y="780" font-family="Arial" font-size="12" fill="#374151">Repairs</text>
+<rect x="180" y="766" width="560" height="18" rx="4" fill="#e5e7eb"/>
+<rect x="180" y="766" width="560" height="18" rx="4" fill="#2563eb"/>
+<text x="754" y="780" font-family="Arial" font-size="12" fill="#111827">100% (1/1)</text>
+<text x="24" y="814" font-family="Arial" font-size="12" fill="#374151">Retention</text>
+<rect x="180" y="800" width="560" height="18" rx="4" fill="#e5e7eb"/>
+<rect x="180" y="800" width="560" height="18" rx="4" fill="#2563eb"/>
+<text x="754" y="814" font-family="Arial" font-size="12" fill="#111827">100% (1/1)</text>
+<text x="24" y="848" font-family="Arial" font-size="12" fill="#374151">Scope of Work</text>
+<rect x="180" y="834" width="560" height="18" rx="4" fill="#e5e7eb"/>
+<rect x="180" y="834" width="560" height="18" rx="4" fill="#2563eb"/>
+<text x="754" y="848" font-family="Arial" font-size="12" fill="#111827">100% (1/1)</text>
+<text x="24" y="882" font-family="Arial" font-size="12" fill="#374151">Security Deposit</text>
+<rect x="180" y="868" width="560" height="18" rx="4" fill="#e5e7eb"/>
+<rect x="180" y="868" width="560" height="18" rx="4" fill="#2563eb"/>
+<text x="754" y="882" font-family="Arial" font-size="12" fill="#111827">100% (1/1)</text>
+<text x="24" y="916" font-family="Arial" font-size="12" fill="#374151">Service Levels</text>
+<rect x="180" y="902" width="560" height="18" rx="4" fill="#e5e7eb"/>
+<rect x="180" y="902" width="560" height="18" rx="4" fill="#2563eb"/>
+<text x="754" y="916" font-family="Arial" font-size="12" fill="#111827">100% (2/2)</text>
+<text x="24" y="950" font-family="Arial" font-size="12" fill="#374151">Subprocessors</text>
+<rect x="180" y="936" width="560" height="18" rx="4" fill="#e5e7eb"/>
+<rect x="180" y="936" width="560" height="18" rx="4" fill="#2563eb"/>
+<text x="754" y="950" font-family="Arial" font-size="12" fill="#111827">100% (1/1)</text>
+<text x="24" y="984" font-family="Arial" font-size="12" fill="#374151">Support</text>
+<rect x="180" y="970" width="560" height="18" rx="4" fill="#e5e7eb"/>
+<rect x="180" y="970" width="560" height="18" rx="4" fill="#2563eb"/>
+<text x="754" y="984" font-family="Arial" font-size="12" fill="#111827">100% (1/1)</text>
+<text x="24" y="1018" font-family="Arial" font-size="12" fill="#374151">Termination</text>
+<rect x="180" y="1004" width="560" height="18" rx="4" fill="#e5e7eb"/>
+<rect x="180" y="1004" width="560" height="18" rx="4" fill="#2563eb"/>
+<text x="754" y="1018" font-family="Arial" font-size="12" fill="#111827">100% (5/5)</text>
+<text x="24" y="1052" font-family="Arial" font-size="12" fill="#374151">Termination Assistance</text>
+<rect x="180" y="1038" width="560" height="18" rx="4" fill="#e5e7eb"/>
+<rect x="180" y="1038" width="560" height="18" rx="4" fill="#2563eb"/>
+<text x="754" y="1052" font-family="Arial" font-size="12" fill="#111827">100% (1/1)</text>
+<text x="24" y="1086" font-family="Arial" font-size="12" fill="#374151">Use Restrictions</text>
+<rect x="180" y="1072" width="560" height="18" rx="4" fill="#e5e7eb"/>
+<rect x="180" y="1072" width="560" height="18" rx="4" fill="#2563eb"/>
+<text x="754" y="1086" font-family="Arial" font-size="12" fill="#111827">100% (1/1)</text>
+<text x="24" y="1120" font-family="Arial" font-size="12" fill="#374151">Working Hours</text>
+<rect x="180" y="1106" width="560" height="18" rx="4" fill="#e5e7eb"/>
+<rect x="180" y="1106" width="560" height="18" rx="4" fill="#2563eb"/>
+<text x="754" y="1120" font-family="Arial" font-size="12" fill="#111827">100% (1/1)</text>
+</svg>

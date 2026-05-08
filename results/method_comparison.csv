@@ -1,0 +1,6 @@
+method,status,correct,total_questions,accuracy,answer_match_rate,evidence_match_rate,no_answer_match_rate,average_token_f1,note
+bm25+lexical,ok,75,75,1.0,0.4,0.7733,0.2267,0.6048,
+dense+lexical,ok,73,75,0.9733,0.3867,0.7467,0.2267,0.5952,
+bm25+transformers,ok,58,75,0.7733,0.4,0.7733,0.0,0.584,
+dense+transformers,ok,58,75,0.7733,0.4,0.7733,0.0,0.5616,
+bm25+legal-bert,ok,54,75,0.72,0.3867,0.72,0.0,0.3813,

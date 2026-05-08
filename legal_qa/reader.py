@@ -266,7 +266,46 @@ def _best_fallback_answer(question: str, evidence: str) -> str:
             best_score = score
             best_sentence = sentence
 
-    return _strip_section_prefix(best_sentence or evidence)
+    answer = _strip_section_prefix(best_sentence or evidence)
+    return _shorten_fallback_answer(question, answer)
+
+
+def _shorten_fallback_answer(question: str, answer: str) -> str:
+    if _is_yes_no_question(question):
+        return answer
+
+    normalized_question = question.lower()
+    if not re.search(r"\b(when|how long|how much|how many|where|which|what amount|what monthly|what rate)\b", normalized_question):
+        return answer
+
+    sentence = _strip_clause_label(answer)
+    patterns = [
+        r"\b((?:within|by|for|after|before|from|until|no later than|at least|up to)\s+[^.;,]+)",
+        r"\b((?:\d+(?:\.\d+)?|one|two|three|four|five|six|seven|eight|nine|ten|twelve|fourteen|twenty|thirty|forty|fifty|sixty)\s+(?:business\s+)?(?:hour|hours|day|days|month|months|year|years|percent|calendar\s+days)\b[^.;,]*)",
+        r"\b(\d{1,3}(?:,\d{3})*(?:\.\d+)?\s*(?:KZT|USD|percent|%)\b[^.;,]*)",
+        r"\b(\d{1,2}\s+[A-Z][a-z]+\s+\d{4}\b)",
+        r"\b(arbitration\s+in\s+[^.;,]+)",
+    ]
+
+    for pattern in patterns:
+        match = re.search(pattern, sentence, re.I)
+        if match:
+            return _clean_short_answer(match.group(1))
+
+    return answer
+
+
+def _strip_clause_label(text: str) -> str:
+    text = re.sub(r"^\s*Clause\s+\d+\s*:\s*", "", text, flags=re.I)
+    text = re.sub(r"^\s*\d+(?:\.\d+)*\.?\s+[A-Z][A-Za-z ]{2,60}\.\s*", "", text)
+    return text.strip()
+
+
+def _clean_short_answer(text: str) -> str:
+    text = re.sub(r"\s+", " ", text).strip(" \t\r\n\"'`.,;:()[]{}")
+    if text and not text.endswith("."):
+        text += "."
+    return text[:1].upper() + text[1:] if text else text
 
 
 def _strip_section_prefix(text: str) -> str:
