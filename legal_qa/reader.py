@@ -163,6 +163,7 @@ class TransformersReader:
         self._tokenizer = AutoTokenizer.from_pretrained(model_name, local_files_only=not allow_downloads)
         self._model = AutoModelForQuestionAnswering.from_pretrained(model_name, local_files_only=not allow_downloads)
         self._model.eval()
+        self.fallback_threshold = float(os.environ.get("LEGAL_QA_TRANSFORMER_FALLBACK_THRESHOLD", "0.15"))
 
     def answer(self, question: str, retrievals: Sequence[RetrievalResult]) -> ReaderOutput:
         if not retrievals:
@@ -193,7 +194,7 @@ class TransformersReader:
         confidence = float(start_scores[start_index] * end_scores[end_index])
 
         # Low confidence fallback
-        if not answer or confidence < 0.15:
+        if not answer or confidence < self.fallback_threshold:
             best_retrieval = retrievals[0]
             fallback_evidence = best_retrieval.chunk.text
             fallback_answer = _best_fallback_answer(question, fallback_evidence)
