@@ -7,10 +7,14 @@ for use with the Legal QA Assistant.
 import json
 import re
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, Iterable, List, Optional
 
 import pandas as pd
 from datasets import load_dataset
+from huggingface_hub import hf_hub_download
+
+
+CUAD_QA_DATA_REVISION = "53fc9be1de79a35a82ac36f33198a753df949523"
 
 
 class CUADAdapter:
@@ -19,6 +23,7 @@ class CUADAdapter:
     def __init__(self):
         self.dataset = None
         self.qa_pairs = []
+        self.last_error = ""
     
     def load_from_huggingface(
         self,
@@ -27,6 +32,76 @@ class CUADAdapter:
         use_demo_on_fail: bool = False,
     ) -> bool:
         """Load real CUAD QA dataset from Hugging Face."""
+        self.last_error = ""
+
+        loaders = [
+            self._load_cuad_qa_dataset_revision,
+            self._load_cuad_v1_json,
+        ]
+
+        errors = []
+        for loader in loaders:
+            try:
+                if loader(split=split, limit=limit):
+                    return True
+            except Exception as exc:
+                errors.append(f"{loader.__name__}: {exc}")
+
+        self.last_error = " | ".join(errors) or "No CUAD loader returned data."
+        print(f"Error loading CUAD from Hugging Face: {self.last_error}")
+
+        if use_demo_on_fail:
+            return self._load_demo_data()
+
+        return False
+
+    def _load_cuad_qa_dataset_revision(
+        self,
+        split: str = "train",
+        limit: Optional[int] = None,
+    ) -> bool:
+        """Load the converted CUAD-QA data revision that does not need remote code."""
+        self.dataset = load_dataset(
+            "theatticusproject/cuad-qa",
+            revision=CUAD_QA_DATA_REVISION,
+        )
+        self.qa_pairs = self.extract_qa_pairs(split=split, limit=limit)
+
+        if not self.qa_pairs:
+            raise ValueError("CUAD-QA loaded, but no QA pairs were extracted.")
+
+        return True
+
+    def _load_cuad_v1_json(
+        self,
+        split: str = "train",
+        limit: Optional[int] = None,
+    ) -> bool:
+        """Load the original CUAD SQuAD-style JSON from the stable CUAD repo."""
+        file_path = hf_hub_download(
+            repo_id="theatticusproject/cuad",
+            repo_type="dataset",
+            filename="CUAD_v1/CUAD_v1.json",
+        )
+
+        with open(file_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+
+        self.dataset = None
+        self.qa_pairs = self._extract_squad_qa_pairs(data, limit=limit)
+
+        if not self.qa_pairs:
+            raise ValueError("CUAD_v1.json loaded, but no QA pairs were extracted.")
+
+        return True
+
+    def load_from_huggingface_legacy(
+        self,
+        split: str = "train",
+        limit: Optional[int] = None,
+        use_demo_on_fail: bool = False,
+    ) -> bool:
+        """Legacy loader kept for reference with old datasets versions."""
         try:
             self.dataset = load_dataset(
                 "theatticusproject/cuad-qa",
@@ -41,6 +116,7 @@ class CUADAdapter:
             return True
 
         except Exception as e:
+            self.last_error = str(e)
             print(f"Error loading CUAD-QA from Hugging Face: {e}")
 
             if use_demo_on_fail:
@@ -109,7 +185,10 @@ class CUADAdapter:
             
             # Handle different JSON formats
             if isinstance(data, dict) and 'data' in data:
-                self.qa_pairs = data['data']
+                if data['data'] and isinstance(data['data'][0], dict) and 'paragraphs' in data['data'][0]:
+                    self.qa_pairs = self._extract_squad_qa_pairs(data)
+                else:
+                    self.qa_pairs = data['data']
             elif isinstance(data, list):
                 self.qa_pairs = data
             else:
@@ -119,6 +198,74 @@ class CUADAdapter:
         except Exception as e:
             print(f"Error loading CUAD from JSON: {e}")
             return False
+
+    def _extract_squad_qa_pairs(
+        self,
+        data: Dict,
+        limit: Optional[int] = None,
+    ) -> List[Dict]:
+        """Extract QA pairs from SQuAD-style CUAD JSON."""
+        qa_pairs = []
+
+        for item in self._iter_squad_items(data):
+            if limit is not None and len(qa_pairs) >= limit:
+                break
+            qa_pairs.append(self._normalize_qa_item(item, fallback_id=f"cuad_{len(qa_pairs)}"))
+
+        return qa_pairs
+
+    def _iter_squad_items(self, data: Dict) -> Iterable[Dict]:
+        for document in data.get("data", []):
+            title = document.get("title", "")
+            for paragraph in document.get("paragraphs", []):
+                context = paragraph.get("context", "") or ""
+                for qa in paragraph.get("qas", []):
+                    yield {
+                        "id": qa.get("id", ""),
+                        "title": title,
+                        "context": context,
+                        "question": qa.get("question", "") or "",
+                        "answers": qa.get("answers", []) or [],
+                    }
+
+    def _normalize_qa_item(self, item: Dict, fallback_id: str) -> Dict:
+        answers = item.get("answers", {}) or {}
+
+        if isinstance(answers, list):
+            answer_texts = [answer.get("text", "") for answer in answers]
+            answer_starts = [answer.get("answer_start", -1) for answer in answers]
+        else:
+            answer_texts = answers.get("text", [])
+            answer_starts = answers.get("answer_start", [])
+
+        if isinstance(answer_texts, str):
+            answer_texts = [answer_texts]
+
+        if isinstance(answer_starts, int):
+            answer_starts = [answer_starts]
+
+        answer_text = answer_texts[0] if answer_texts else ""
+        answer_start = answer_starts[0] if answer_starts else -1
+        context = item.get("context", "") or ""
+
+        if answer_text and isinstance(answer_start, int) and answer_start >= 0:
+            evidence = context[answer_start:answer_start + len(answer_text)]
+        else:
+            evidence = ""
+
+        question = item.get("question", "") or ""
+        category = self._extract_category_from_question(question)
+
+        return {
+            "id": item.get("id", fallback_id),
+            "title": item.get("title", ""),
+            "question": self._map_category_to_natural_question(category),
+            "original_question": question,
+            "answer": answer_text,
+            "context": context,
+            "evidence": evidence,
+            "category": category,
+        }
     
     def extract_qa_pairs(
         self,
@@ -138,44 +285,10 @@ class CUADAdapter:
             if limit is not None and len(qa_pairs) >= limit:
                 break
 
-            answers = item.get("answers", {}) or {}
+            qa_pair = self._normalize_qa_item(item, fallback_id=f"cuad_{i}")
 
-            answer_texts = answers.get("text", [])
-            answer_starts = answers.get("answer_start", [])
-
-            if isinstance(answer_texts, str):
-                answer_texts = [answer_texts]
-
-            if isinstance(answer_starts, int):
-                answer_starts = [answer_starts]
-
-            answer_text = answer_texts[0] if answer_texts else ""
-            answer_start = answer_starts[0] if answer_starts else -1
-
-            if not include_unanswerable and not answer_text:
+            if not include_unanswerable and not qa_pair["answer"]:
                 continue
-
-            context = item.get("context", "") or ""
-
-            if answer_text and isinstance(answer_start, int) and answer_start >= 0:
-                evidence = context[answer_start:answer_start + len(answer_text)]
-            else:
-                evidence = ""
-
-            question = item.get("question", "") or ""
-
-            qa_pair = {
-                "id": item.get("id", f"cuad_{i}"),
-                "title": item.get("title", ""),
-                "question": self._map_category_to_natural_question(
-                    self._extract_category_from_question(question)
-                ),
-                "original_question": question,
-                "answer": answer_text,
-                "context": context,
-                "evidence": evidence,
-                "category": self._extract_category_from_question(question),
-            }
 
             qa_pairs.append(qa_pair)
 

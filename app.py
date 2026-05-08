@@ -65,10 +65,17 @@ def load_cuad_dataset():
         cuad_adapter = CUADAdapter()
         
         with st.spinner("Loading CUAD dataset..."):
-            if cuad_adapter.load_from_huggingface():
+            if cuad_adapter.load_from_huggingface(use_demo_on_fail=True):
                 # Check if we're using demo data
-                if len(cuad_adapter.qa_pairs) > 0 and len(cuad_adapter.qa_pairs) <= 10:
-                    st.info("📋 Using CUAD-style demo data for demonstration. Full CUAD dataset requires additional setup.")
+                if cuad_adapter.last_error:
+                    st.warning(
+                        "Could not load the full CUAD dataset from Hugging Face, "
+                        "so the app is using the built-in CUAD-style demo sample."
+                    )
+                    with st.expander("CUAD loading details"):
+                        st.code(cuad_adapter.last_error)
+                elif len(cuad_adapter.qa_pairs) > 0 and len(cuad_adapter.qa_pairs) <= 10:
+                    st.info("Using CUAD-style demo data for demonstration.")
                 else:
                     st.success("CUAD dataset loaded successfully!")
                 
@@ -78,7 +85,10 @@ def load_cuad_dataset():
                 
                 return cuad_adapter, df, document_text
             else:
-                st.error("Failed to load CUAD dataset. Please check your internet connection.")
+                st.error("Failed to load CUAD dataset.")
+                if cuad_adapter.last_error:
+                    with st.expander("CUAD loading details"):
+                        st.code(cuad_adapter.last_error)
                 return None, None, None
     except Exception as e:
         st.error(f"Error loading CUAD dataset: {str(e)}")
