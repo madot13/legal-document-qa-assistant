@@ -174,8 +174,24 @@ class CUADAdapter:
             }
         ]
         
-        self.qa_pairs = demo_data
+        self.qa_pairs = [
+            self._normalize_demo_item(item, fallback_id=f"demo_{index + 1}")
+            for index, item in enumerate(demo_data)
+        ]
         return True
+
+    def _normalize_demo_item(self, item: Dict, fallback_id: str) -> Dict:
+        category = item.get('category', '')
+        return {
+            'id': item.get('id', fallback_id),
+            'title': item.get('title', ''),
+            'question': self._map_category_to_natural_question(category),
+            'original_question': item.get('question', ''),
+            'answer': item.get('answer', ''),
+            'context': item.get('context', ''),
+            'evidence': item.get('evidence', ''),
+            'category': category,
+        }
     
     def load_from_json(self, file_path: Path) -> bool:
         """Load CUAD dataset from local JSON file."""
@@ -300,21 +316,8 @@ class CUADAdapter:
         for i, item in enumerate(self.qa_pairs):
             if limit and i >= limit:
                 break
-            
-            # Map CUAD category to natural question
-            natural_question = self._map_category_to_natural_question(item.get('category', ''))
-            
-            qa_pair = {
-                'id': item.get('id', f'item_{i}'),
-                'title': item.get('title', ''),
-                'question': natural_question,
-                'original_question': item.get('question', ''),  # Keep original for reference
-                'answer': item.get('answer', ''),
-                'context': item.get('context', ''),
-                'evidence': item.get('evidence', ''),
-                'category': item.get('category', '')
-            }
-            qa_pairs.append(qa_pair)
+
+            qa_pairs.append(self._normalize_demo_item(item, fallback_id=f'item_{i}'))
         
         return qa_pairs
     
@@ -359,7 +362,11 @@ class CUADAdapter:
             "Third Party": "What third party rights are granted?",
             "Uncapped Liability": "What uncapped liability provisions exist?",
             "Volume": "What volume commitments are stated?",
-            "Warranty": "What warranty provisions apply?"
+            "Warranty": "What warranty provisions apply?",
+            "Warranty Duration": "What warranty period, duration, days, months, defect, repair, or product obligations are stated?",
+            "Document Name": "What is the document name, agreement name, or contract title?",
+            "Parties": "Which parties, company, distributor, seller, buyer, licensor, or licensee are named?",
+            "Agreement Date": "What agreement date, effective date, execution date, or dated provisions are stated?",
         }
         
         return category_mappings.get(category, f"What {category.lower()} provisions are stated?")

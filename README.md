@@ -202,6 +202,29 @@ Run the small sample evaluation:
 python scripts/evaluate_sample.py
 ```
 
+Run CUAD-specific evaluation:
+
+```bash
+python scripts/evaluate_cuad.py --limit 50 --context-mode all --methods bm25+lexical,bm25+legal-bert
+```
+
+Useful CUAD diagnostics:
+
+```bash
+python scripts/evaluate_cuad.py --category "Warranty Duration" --limit 20 --context-mode all
+```
+
+`evidence-context` tests whether the reader can extract the answer when the gold evidence is already isolated. `gold-context` tests retrieval inside the selected contract. `full-document` tests retrieval across the loaded CUAD examples.
+
+Fine-tune the QA reader on CUAD examples:
+
+```bash
+LEGAL_QA_ALLOW_MODEL_DOWNLOADS=1 python scripts/train_cuad_qa.py \
+  --limit 500 \
+  --model nlpaueb/legal-bert-base-uncased \
+  --output-dir models/legal-bert-qa
+```
+
 ## Deployment
 
 The project is deployed on Hugging Face Spaces with Docker.

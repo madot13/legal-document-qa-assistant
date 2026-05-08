@@ -1,0 +1,80 @@
+{
+  "total_rows": 100,
+  "limit": 100,
+  "category": null,
+  "top_k": 5,
+  "summaries": [
+    {
+      "method": "bm25+lexical",
+      "context_mode": "evidence-context",
+      "total": 100,
+      "retrieval_hit_rate": 0.35,
+      "answer_match_rate": 0.03,
+      "evidence_match_rate": 0.03,
+      "group_match_rate": 0.03,
+      "average_token_f1": 0.07237032396486019,
+      "status": "ok",
+      "note": ""
+    },
+    {
+      "method": "bm25+legal-bert",
+      "context_mode": "evidence-context",
+      "total": 100,
+      "retrieval_hit_rate": 0.35,
+      "answer_match_rate": 0.34,
+      "evidence_match_rate": 0.34,
+      "group_match_rate": 0.34,
+      "average_token_f1": 0.3706918119327311,
+      "status": "ok",
+      "note": ""
+    },
+    {
+      "method": "bm25+lexical",
+      "context_mode": "gold-context",
+      "total": 100,
+      "retrieval_hit_rate": 0.21,
+      "answer_match_rate": 0.02,
+      "evidence_match_rate": 0.02,
+      "group_match_rate": 0.09,
+      "average_token_f1": 0.09955428139890678,
+      "status": "ok",
+      "note": ""
+    },
+    {
+      "method": "bm25+legal-bert",
+      "context_mode": "gold-context",
+      "total": 100,
+      "retrieval_hit_rate": 0.21,
+      "answer_match_rate": 0.08,
+      "evidence_match_rate": 0.08,
+      "group_match_rate": 0.19,
+      "average_token_f1": 0.08436203799890812,
+      "status": "ok",
+      "note": ""
+    },
+    {
+      "method": "bm25+lexical",
+      "context_mode": "full-document",
+      "total": 100,
+      "retrieval_hit_rate": 0.14,
+      "answer_match_rate": 0.03,
+      "evidence_match_rate": 0.03,
+      "group_match_rate": 0.09,
+      "average_token_f1": 0.06329295192061916,
+      "status": "ok",
+      "note": ""
+    },
+    {
+      "method": "bm25+legal-bert",
+      "context_mode": "full-document",
+      "total": 100,
+      "retrieval_hit_rate": 0.14,
+      "answer_match_rate": 0.09,
+      "evidence_match_rate": 0.09,
+      "group_match_rate": 0.23,
+      "average_token_f1": 0.08496001478174804,
+      "status": "ok",
+      "note": ""
+    }
+  ]
+}

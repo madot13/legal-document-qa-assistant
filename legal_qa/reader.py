@@ -168,9 +168,6 @@ class TransformersReader:
         if not retrievals:
             return ReaderOutput(NOT_FOUND_ANSWER, 0.0, "", self.model_name, False)
 
-        if not _is_answerable(question, retrievals):
-            return ReaderOutput(NOT_FOUND_ANSWER, 0.0, "", self.model_name, False)
-
         context = "\n\n".join(item.chunk.text for item in retrievals)
         inputs = self._tokenizer(
             question,
@@ -200,9 +197,10 @@ class TransformersReader:
             best_retrieval = retrievals[0]
             fallback_evidence = best_retrieval.chunk.text
             fallback_answer = _best_fallback_answer(question, fallback_evidence)
+            fallback_confidence = min(0.94, 0.35 + (best_retrieval.score / (best_retrieval.score + 6.0)) * 0.55)
             return ReaderOutput(
                 answer=fallback_answer,
-                confidence=best_retrieval.score,
+                confidence=fallback_confidence,
                 evidence=fallback_evidence,
                 model=f"{self.model_name} (fallback)",
                 found=True

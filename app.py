@@ -39,6 +39,28 @@ def answer_matches_expected(expected_answer: object, expected_evidence: object, 
     )
 
 
+def build_cuad_oracle_result(selected_row):
+    """Return the CUAD annotation as the answer for dataset inspection mode."""
+    from legal_qa.types import Answer
+
+    answer = str(selected_row.get('answer') or '').strip()
+    evidence = str(selected_row.get('evidence') or answer).strip()
+    title = str(selected_row.get('title') or 'CUAD Dataset')
+    question = str(selected_row.get('question') or '')
+
+    return Answer(
+        question=question,
+        answer=answer or "No annotated answer in CUAD.",
+        confidence=1.0 if answer else 0.0,
+        evidence=evidence,
+        source=f"CUAD Annotation: {title}",
+        chunk_id=str(selected_row.get('id') or ''),
+        retrieval_score=1.0 if answer else 0.0,
+        model="CUAD annotated answer",
+        found=bool(answer),
+    )
+
+
 def load_qa_dataset(csv_file):
     """Load QA dataset from CSV file"""
     try:
@@ -249,9 +271,22 @@ with st.sidebar:
     # Comparison mode
     compare_mode = st.checkbox("Compare with baseline", help="Run both baseline and transformer models side by side")
 
+    use_cuad_annotation = False
+    if input_mode == "Load CUAD Dataset":
+        use_cuad_annotation = st.checkbox(
+            "Use CUAD annotated answer",
+            value=False,
+            help="Show the selected CUAD gold annotation as the answer. Disable this to test the retrieval/model pipeline.",
+        )
+
 if (uploaded_file and question) or (qa_dataset is not None and question):
     try:
-        if input_mode == "Upload Document":
+        if input_mode == "Load CUAD Dataset" and use_cuad_annotation and selected_dataset_row is not None:
+            result = build_cuad_oracle_result(selected_dataset_row)
+            assistant = None
+            source_name = result.source
+            text = str(selected_dataset_row.get('context') or document_text)
+        elif input_mode == "Upload Document":
             # Handle document upload
             suffix = Path(uploaded_file.name).suffix or ".txt"
             with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as temporary_file:
@@ -274,7 +309,9 @@ if (uploaded_file and question) or (qa_dataset is not None and question):
                 selected_title = selected_dataset_row.get('title') if selected_dataset_row is not None else ""
                 source_name = f"CUAD Dataset: {selected_title}" if selected_title else "CUAD Dataset"
 
-        if compare_mode and reader == "transformers":
+        if result is not None:
+            pass
+        elif compare_mode and reader == "transformers":
             # Run both baseline and transformer for comparison
             st.subheader("🔄 Comparison Mode")
             
@@ -340,12 +377,14 @@ if (uploaded_file and question) or (qa_dataset is not None and question):
         st.stop()
 
     # Enhanced result display (only show if not in comparison mode)
-if result is not None and not (compare_mode and reader == "transformers"):
+is_cuad_annotation_result = result is not None and result.model == "CUAD annotated answer"
+
+if result is not None and (is_cuad_annotation_result or not (compare_mode and reader == "transformers")):
     col1, col2, col3, col4 = st.columns(4)
     col1.metric("Confidence", f"{result.confidence:.2f}")
     col2.metric("Retrieval Score", f"{result.retrieval_score:.3f}")
     col3.metric("Chunks Used", top_k)
-    col4.metric("Chunks Indexed", len(assistant.chunks))
+    col4.metric("Chunks Indexed", len(assistant.chunks) if assistant else 1)
 
     st.subheader("Answer")
     st.write(result.answer)
@@ -354,7 +393,10 @@ if result is not None and not (compare_mode and reader == "transformers"):
     st.write(result.evidence or "No supporting evidence found.")
 
     # Method information
-    method_info = f"{retriever_label} + {reader_label}"
+    if is_cuad_annotation_result:
+        method_info = "CUAD annotation lookup"
+    else:
+        method_info = f"{retriever_label} + {reader_label}"
     if "fallback" in result.model:
         method_info += " (with fallback)"
     st.info(f"**Method:** {method_info}")
